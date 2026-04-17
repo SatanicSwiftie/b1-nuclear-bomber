@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B-1 NUCLEAR BOMBER — SAC TACTICAL</title>
+<!-- <link> tags load from file:// in Chrome; @import inside <style> blocks external requests -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap">
+<style>
+/* Graceful fallbacks if fonts can't load */
+
+:root {
+–p0: #001a08; –p1: #003d12; –p2: #00882a; –p3: #00cc3f; –p4: #00ff52; –p5: #aaffcc;
+–amber: #ffb300; –red: #ff2a2a;
+–bezel: #1a1a18; –bezel-hi: #2e2e2a; –bezel-lo: #0d0d0c;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;background:#0c0c0a;display:flex;align-items:center;
+justify-content:center;font-family:‘Share Tech Mono’,‘Courier New’,Courier,monospace;overflow:hidden;user-select:none;}
+
+#console{display:flex;flex-direction:column;align-items:center;width:min(98vw,1100px);}
+
+#nameplate{width:100%;background:linear-gradient(180deg,var(–bezel-hi) 0%,var(–bezel) 40%,var(–bezel-lo) 100%);
+border:1px solid #3a3a30;border-bottom:none;padding:6px 24px;display:flex;align-items:center;
+justify-content:space-between;border-radius:6px 6px 0 0;box-shadow:0 -2px 12px rgba(0,0,0,.8);}
+.brand{font-family:‘Orbitron’,‘Arial Narrow’,Arial,sans-serif;font-size:clamp(9px,1.3vw,13px);font-weight:700;
+letter-spacing:4px;color:var(–p3);text-shadow:0 0 12px var(–p3);}
+.serial{font-size:9px;color:#555;letter-spacing:2px;}
+
+#main-row{display:flex;width:100%;background:var(–bezel);
+border-left:1px solid #3a3a30;border-right:1px solid #3a3a30;}
+
+/* ── SCOPE ─────────────────────────────────── */
+#scope-housing{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;
+padding:16px 12px 10px;
+background:radial-gradient(ellipse at 50% 20%,#252520 0%,#181815 60%,#0d0d0b 100%);}
+#scope-ring{position:relative;border-radius:50%;padding:14px;
+background:radial-gradient(circle at 30% 25%,#444440 0%,#222220 40%,#0a0a08 100%);
+box-shadow:0 0 0 3px #111110,0 0 0 6px #2a2a26,0 0 0 8px #111110,
+inset 0 2px 6px rgba(255,255,255,.04),0 8px 40px rgba(0,0,0,.9),0 0 60px rgba(0,200,60,.05);}
+#scope-ring::before{content:’’;position:absolute;inset:14px;border-radius:50%;
+border:1px solid rgba(0,200,60,.12);pointer-events:none;z-index:10;
+box-shadow:inset 0 0 30px rgba(0,0,0,.6),0 0 20px rgba(0,200,60,.08);}
+#canvas-wrap{position:relative;border-radius:50%;overflow:hidden;cursor:crosshair;}
+canvas{position:absolute;top:0;left:0;border-radius:50%;}
+#c-bg{z-index:1;}#c-phos{z-index:2;}#c-sweep{z-index:3;}#c-ui{z-index:4;}#c-top{z-index:5;}
+
+/* knobs */
+#knob-row{display:flex;gap:18px;margin-top:10px;align-items:center;}
+.knob-group{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.knob{width:30px;height:30px;border-radius:50%;
+background:radial-gradient(circle at 35% 30%,#555550,#222220);
+border:2px solid #444;box-shadow:0 2px 6px rgba(0,0,0,.8),inset 0 1px 2px rgba(255,255,255,.08);
+position:relative;cursor:pointer;transition:transform .15s;}
+.knob::after{content:’’;position:absolute;top:3px;left:50%;transform:translateX(-50%);
+width:2px;height:8px;background:var(–p3);border-radius:1px;box-shadow:0 0 4px var(–p3);}
+.knob:hover{transform:rotate(15deg);}
+.knob-label{font-size:7px;color:#555;letter-spacing:1px;text-align:center;}
+.switch-group{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.switch{width:14px;height:28px;background:linear-gradient(180deg,#333 0%,#222 100%);
+border:1px solid #444;border-radius:3px;position:relative;cursor:pointer;
+box-shadow:0 2px 4px rgba(0,0,0,.6);}
+.switch-nub{position:absolute;width:12px;height:12px;
+background:radial-gradient(circle at 40% 35%,#888,#555);border-radius:2px;
+border:1px solid #666;left:0;top:0;transition:top .12s;box-shadow:0 1px 3px rgba(0,0,0,.5);}
+.switch.on .switch-nub{top:14px;}
+.switch.on{background:linear-gradient(180deg,#1a3320 0%,#0d1f11 100%);}
+.switch-label{font-size:7px;color:#555;letter-spacing:1px;}
+
+/* ── RIGHT PANEL ───────────────────────────── */
+#right-panel{flex:1;display:flex;flex-direction:column;padding:10px 10px 6px 6px;gap:6px;min-width:0;}
+.data-box{background:var(–p0);border:1px solid var(–p1);padding:6px 10px;position:relative;
+box-shadow:inset 0 0 20px rgba(0,0,0,.5);}
+.data-box::before{content:attr(data-label);position:absolute;top:-1px;left:8px;font-size:8px;
+letter-spacing:3px;color:var(–p2);background:var(–p0);padding:0 4px;transform:translateY(-50%);}
+
+.bar-row{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.bar-key{font-size:9px;color:var(–p2);letter-spacing:1px;width:52px;flex-shrink:0;}
+.bar-track{flex:1;height:8px;background:var(–p0);border:1px solid var(–p1);
+position:relative;overflow:hidden;}
+.bar-fill{height:100%;background:var(–p3);box-shadow:0 0 6px var(–p3);
+transition:width .4s,background .4s;position:relative;}
+.bar-fill::after{content:’’;position:absolute;right:0;top:0;bottom:0;width:2px;
+background:var(–p5);opacity:.7;}
+.bar-fill.warn{background:var(–amber);box-shadow:0 0 6px var(–amber);}
+.bar-fill.crit{background:var(–red);box-shadow:0 0 6px var(–red);}
+.bar-pct{font-size:9px;color:var(–p3);width:30px;text-align:right;flex-shrink:0;}
+
+.data-row{display:flex;justify-content:space-between;align-items:center;}
+.data-key{color:var(–p2);font-size:10px;letter-spacing:1px;}
+.data-val{color:var(–p4);font-family:‘Orbitron’,‘Arial Narrow’,Arial,sans-serif;font-size:11px;letter-spacing:2px;}
+.data-val.warn{color:var(–amber);text-shadow:0 0 8px var(–amber);}
+.data-val.crit{color:var(–red);text-shadow:0 0 8px var(–red);
+animation:crit-blink .6s step-end infinite;}
+@keyframes crit-blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+.sys-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;
+border-bottom:1px solid rgba(0,136,42,.12);font-size:10px;}
+.sys-row:last-child{border-bottom:none;}
+.sys-name{color:var(–p2);letter-spacing:1px;}
+.sys-btn{background:var(–p0);border:1px solid var(–p2);color:var(–p3);
+font-family:‘Share Tech Mono’,‘Courier New’,Courier,monospace;font-size:8px;padding:2px 7px;cursor:pointer;
+letter-spacing:2px;transition:all .1s;}
+.sys-btn:hover{border-color:var(–p4);background:rgba(0,200,60,.08);}
+.sys-btn.active{background:var(–p3);color:var(–p0);box-shadow:0 0 8px var(–p3);border-color:var(–p4);}
+
+#threat-board{flex:1;overflow:hidden;min-height:60px;}
+.threat-line{font-size:10px;padding:2px 0;border-bottom:1px solid rgba(0,136,42,.08);
+display:flex;gap:8px;color:var(–p2);animation:tline-fade 4s forwards;}
+@keyframes tline-fade{0%{color:var(–p4)}30%{color:var(–p3)}100%{color:var(–p2)}}
+.threat-line.hot{color:var(–red)!important;animation:none;}
+.threat-line.warn{color:var(–amber)!important;animation:none;}
+.tl-time{color:rgba(0,200,60,.3);flex-shrink:0;}
+.no-contact{color:var(–p1);font-size:10px;letter-spacing:2px;margin-top:4px;}
+
+/* ── BOTTOM PANEL ──────────────────────────── */
+#bottom-panel{width:100%;background:linear-gradient(0deg,var(–bezel-lo) 0%,var(–bezel) 60%);
+border:1px solid #3a3a30;border-top:none;padding:8px 20px 10px;
+display:flex;gap:16px;align-items:flex-end;border-radius:0 0 6px 6px;
+box-shadow:0 4px 20px rgba(0,0,0,.8);}
+#keypad{display:grid;grid-template-columns:repeat(3,36px);grid-template-rows:repeat(3,28px);gap:3px;}
+.kp-btn{background:radial-gradient(circle at 40% 30%,#3a3a35,#1e1e1a);border:1px solid #444;
+border-bottom:2px solid #111;color:var(–p3);font-family:‘Share Tech Mono’,‘Courier New’,Courier,monospace;
+font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+border-radius:3px;box-shadow:0 2px 4px rgba(0,0,0,.7);transition:all .08s;position:relative;}
+.kp-btn:hover{background:radial-gradient(circle at 40% 30%,#555,#333);border-color:var(–p2);}
+.kp-btn:active,.kp-btn.pressed{transform:translateY(1px);border-bottom-width:1px;
+box-shadow:0 1px 2px rgba(0,0,0,.7);background:radial-gradient(circle at 40% 30%,#222,#111);}
+.kp-btn .sub{font-size:7px;position:absolute;bottom:2px;right:3px;color:var(–p1);}
+#action-btns{display:flex;flex-direction:column;gap:4px;}
+.act-btn{background:radial-gradient(circle at 40% 30%,#2a2a25,#181813);border:1px solid #444;
+border-bottom:2px solid #111;color:var(–p3);font-family:‘Share Tech Mono’,‘Courier New’,Courier,monospace;
+font-size:9px;letter-spacing:2px;padding:5px 14px;cursor:pointer;border-radius:3px;
+transition:all .08s;box-shadow:0 2px 4px rgba(0,0,0,.7);min-width:148px;text-align:center;}
+.act-btn:hover:not(:disabled){border-color:var(–p2);
+background:radial-gradient(circle at 40% 30%,#3a3a35,#252520);}
+.act-btn:active:not(:disabled){transform:translateY(1px);border-bottom-width:1px;}
+.act-btn:disabled{opacity:.3;cursor:not-allowed;}
+.act-btn.red-btn{border-color:#553;color:var(–amber);}
+.act-btn.red-btn:hover:not(:disabled){border-color:var(–amber);color:#fff;background:rgba(255,160,0,.08);}
+.act-btn.fire-btn{border-color:#553333;color:var(–red);
+animation:fire-pulse 2s ease-in-out infinite;}
+@keyframes fire-pulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 10px rgba(255,40,40,.3)}}
+.act-btn.fire-btn:hover:not(:disabled){border-color:var(–red);background:rgba(255,40,40,.08);}
+#status-line{flex:1;display:flex;flex-direction:column;gap:4px;padding-left:8px;
+border-left:1px solid #2a2a25;}
+.status-label{font-size:8px;color:#444;letter-spacing:2px;}
+#status-msg{font-family:‘Orbitron’,‘Arial Narrow’,Arial,sans-serif;font-size:clamp(9px,1vw,11px);color:var(–p3);
+letter-spacing:2px;text-shadow:0 0 8px var(–p3);}
+#status-msg.warn{color:var(–amber);text-shadow:0 0 8px var(–amber);}
+#status-msg.crit{color:var(–red);text-shadow:0 0 8px var(–red);}
+.phase-pill{display:inline-block;border:1px solid var(–p2);color:var(–p3);
+font-size:8px;letter-spacing:3px;padding:1px 8px;}
+#turn-disp{font-family:‘Orbitron’,‘Arial Narrow’,Arial,sans-serif;font-size:18px;color:var(–p2);
+letter-spacing:3px;text-align:center;min-width:60px;}
+#turn-disp .turn-label{font-size:8px;letter-spacing:2px;display:block;color:#444;}
+
+/* ── OVERLAYS ───────────────────────────────── */
+#game-overlay{display:none;position:fixed;inset:0;background:rgba(0,10,3,.93);
+align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:16px;}
+#game-overlay.show{display:flex;}
+#go-title{font-family:‘Orbitron’,‘Arial Narrow’,Arial,sans-serif;font-size:clamp(28px,5vw,52px);
+letter-spacing:6px;text-align:center;}
+#go-title.win{color:var(–p4);text-shadow:0 0 40px var(–p4),0 0 80px rgba(0,255,80,.3);}
+#go-title.loss{color:var(–red);text-shadow:0 0 40px var(–red);
+animation:shake .4s ease-in-out 4;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+#go-body{font-size:13px;color:var(–p2);text-align:center;line-height:2.2;letter-spacing:1px;}
+#go-score{font-family:‘Orbitron’,‘Arial Narrow’,Arial,sans-serif;font-size:22px;color:var(–amber);letter-spacing:4px;}
+#go-restart{background:transparent;border:1px solid var(–p3);color:var(–p3);
+font-family:‘Orbitron’,‘Arial Narrow’,Arial,sans-serif;font-size:13px;letter-spacing:5px;padding:10px 30px;
+cursor:pointer;transition:all .2s;}
+#go-restart:hover{background:var(–p3);color:var(–p0);box-shadow:0 0 24px var(–p3);}
+
+#intro-screen{position:fixed;inset:0;background:#020d04;display:flex;flex-direction:column;
+align-items:center;justify-content:center;z-index:10000;gap:14px;padding:20px;}
+#intro-screen h1{font-family:‘Orbitron’,‘Arial Narrow’,Arial,sans-serif;font-size:clamp(18px,3.5vw,40px);
+letter-spacing:6px;color:var(–p4);text-shadow:0 0 30px var(–p4);text-align:center;}
+.intro-tag{font-size:10px;color:var(–p2);letter-spacing:5px;}
+.brief-box{max-width:600px;width:100%;border:1px solid var(–p1);background:rgba(0,255,80,.02);
+padding:14px 20px;font-size:11px;color:var(–p2);line-height:2;}
+.brief-box h3{color:var(–amber);letter-spacing:4px;font-size:10px;margin:8px 0 4px;}
+.brief-box span{color:var(–p4);}
+.diff-row{display:flex;align-items:center;gap:10px;font-size:10px;color:var(–p2);}
+select.diff-sel{background:var(–p0);border:1px solid var(–p2);color:var(–p4);
+font-family:‘Share Tech Mono’,‘Courier New’,Courier,monospace;font-size:10px;padding:3px 8px;cursor:pointer;}
+#intro-start{background:transparent;border:1px solid var(–p3);color:var(–p4);
+font-family:‘Orbitron’,‘Arial Narrow’,Arial,sans-serif;font-size:14px;letter-spacing:6px;padding:12px 40px;
+cursor:pointer;animation:intro-pulse 1.8s ease-in-out infinite;transition:all .2s;}
+@keyframes intro-pulse{0%,100%{box-shadow:0 0 0 transparent}50%{box-shadow:0 0 24px rgba(0,255,80,.35)}}
+#intro-start:hover{background:var(–p3);color:var(–p0);}
+</style>
+
+</head>
+<body>
+
+<div id="intro-screen">
+  <h1>B-1 NUCLEAR BOMBER</h1>
+  <div class="intro-tag">STRATEGIC AIR COMMAND — AN/TPX-24 TACTICAL DISPLAY</div>
+  <div class="brief-box">
+    <h3>MISSION</h3>
+    Penetrate Soviet airspace. Destroy all <span>TARGET</span> cities with your nuclear payload. Egress west.
+    <h3>NAVIGATION</h3>
+    <span>ARROW KEYS / WASD</span> to move. <span>CLICK</span> adjacent blips on the scope. Keypad buttons below.
+    <h3>SYSTEMS  [keys: 1 2 3]</h3>
+    <span>ECM</span> — jams SAM radar, halves hit probability, burns fuel.<br>
+    <span>TERRAIN FOLLOW</span> — lowers radar cross-section, burns fuel.<br>
+    <span>AFTERBURNER</span> — aids interceptor evasion, high fuel cost.
+    <h3>SCOPE LEGEND</h3>
+    <span>▲</span> SAM site &nbsp;&nbsp; <span>◉</span> Radar &nbsp;&nbsp; <span>✛</span> Target &nbsp;&nbsp;
+    <span style="color:#88aaff">◆</span> Tanker &nbsp;&nbsp; <span style="color:#ffdd44">▷</span> Interceptor base
+  </div>
+  <div class="diff-row">
+    DIFFICULTY:
+    <select class="diff-sel" id="diff-sel">
+      <option value="easy">EASY — 1965 THREAT DENSITY</option>
+      <option value="medium" selected>MEDIUM — 1975 STANDARD</option>
+      <option value="hard">HARD — 1985 DENSE DEFENSE</option>
+    </select>
+  </div>
+  <button id="intro-start" onclick="beginMission()">INITIATE MISSION</button>
+</div>
+
+<div id="game-overlay">
+  <div id="go-title">MISSION COMPLETE</div>
+  <div id="go-body"></div>
+  <div id="go-score"></div>
+  <button id="go-restart" onclick="beginMission()">NEW MISSION</button>
+</div>
+
+<div id="console">
+  <div id="nameplate">
+    <div class="brand">AN/TPX-24 · TACTICAL PENETRATION DISPLAY</div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:8px;color:#444;letter-spacing:2px;">VOL</span>
+      <input type="range" id="vol-slider" min="0" max="100" value="55"
+        style="width:60px;accent-color:var(--p3);cursor:pointer;height:3px;"
+        oninput="SFX.setVolume(this.value/100)">
+      <span style="font-size:8px;color:#444;letter-spacing:2px;" id="vol-label">55</span>
+    </div>
+    <div class="serial">S/N 74-0312-B · SAC CERTIFIED</div>
+  </div>
+
+  <div id="main-row">
+    <div id="scope-housing">
+      <div id="scope-ring">
+        <div id="canvas-wrap">
+          <canvas id="c-bg"></canvas>
+          <canvas id="c-phos"></canvas>
+          <canvas id="c-sweep"></canvas>
+          <canvas id="c-ui"></canvas>
+          <canvas id="c-top"></canvas>
+        </div>
+      </div>
+      <div id="knob-row">
+        <div class="knob-group"><div class="knob" title="GAIN"></div><div class="knob-label">GAIN</div></div>
+        <div class="knob-group"><div class="knob" style="transform:rotate(40deg)"></div><div class="knob-label">RANGE</div></div>
+        <div class="knob-group"><div class="knob" style="transform:rotate(-25deg)"></div><div class="knob-label">BRIGHT</div></div>
+        <div class="switch-group"><div class="switch on" id="sw-pwr"><div class="switch-nub"></div></div><div class="switch-label">PWR</div></div>
+        <div class="switch-group"><div class="switch" id="sw-iff"><div class="switch-nub"></div></div><div class="switch-label">IFF</div></div>
+        <div class="knob-group"><div class="knob" style="transform:rotate(70deg)"></div><div class="knob-label">CLTR</div></div>
+        <div class="knob-group"><div class="knob" style="transform:rotate(-50deg)"></div><div class="knob-label">FOCUS</div></div>
+      </div>
+    </div>
+
+```
+<div id="right-panel">
+  <div class="data-box" data-label="AIRCRAFT STATUS">
+    <div class="bar-row"><div class="bar-key">FUEL</div><div class="bar-track"><div class="bar-fill" id="bf-fuel" style="width:100%"></div></div><div class="bar-pct" id="pct-fuel">100%</div></div>
+    <div class="bar-row"><div class="bar-key">HULL</div><div class="bar-track"><div class="bar-fill" id="bf-hull" style="width:100%"></div></div><div class="bar-pct" id="pct-hull">100%</div></div>
+    <div class="bar-row"><div class="bar-key">PAYLOAD</div><div class="bar-track"><div class="bar-fill" id="bf-pay" style="width:100%"></div></div><div class="bar-pct" id="pct-pay">3/3</div></div>
+    <div class="data-row" style="margin-top:6px"><span class="data-key">GRID REF</span><span class="data-val" id="dv-grid">A-00</span></div>
+    <div class="data-row"><span class="data-key">TARGETS</span><span class="data-val" id="dv-tgt">0/3</span></div>
+  </div>
+
+  <div class="data-box" data-label="ONBOARD SYSTEMS">
+    <div class="sys-row"><span class="sys-name">ECM SUITE [1]</span><button class="sys-btn" id="sb-ecm" onclick="toggleSys('ecm')">ARM</button></div>
+    <div class="sys-row"><span class="sys-name">TERRAIN FOLLOW [2]</span><button class="sys-btn" id="sb-tf" onclick="toggleSys('tf')">ARM</button></div>
+    <div class="sys-row"><span class="sys-name">AFTERBURNER [3]</span><button class="sys-btn" id="sb-ab" onclick="toggleSys('ab')">ARM</button></div>
+  </div>
+
+  <div class="data-box" data-label="THREAT DISPLAY" style="flex:1;overflow:hidden;">
+    <div id="threat-board"><div class="no-contact">NO CONTACTS DETECTED</div></div>
+  </div>
+</div>
+```
+
+  </div>
+
+  <div id="bottom-panel">
+    <div id="keypad">
+      <div></div>
+      <button class="kp-btn" id="kp-n" onclick="playerMove(0,-1)">▲<span class="sub">W</span></button>
+      <div></div>
+      <button class="kp-btn" id="kp-w" onclick="playerMove(-1,0)">◄<span class="sub">A</span></button>
+      <button class="kp-btn" style="font-size:8px;letter-spacing:0" onclick="playerMove(0,0)">HOLD</button>
+      <button class="kp-btn" id="kp-e" onclick="playerMove(1,0)">►<span class="sub">D</span></button>
+      <div></div>
+      <button class="kp-btn" id="kp-s" onclick="playerMove(0,1)">▼<span class="sub">S</span></button>
+      <div></div>
+    </div>
+    <div id="action-btns">
+      <button class="act-btn fire-btn" id="ab-bomb" onclick="releaseBomb()">⦿ RELEASE WEAPON [SPC]</button>
+      <button class="act-btn red-btn"  id="ab-egress" onclick="doEgress()">→ EGRESS WEST [E]</button>
+    </div>
+    <div id="status-line">
+      <div class="status-label">SYSTEM STATUS</div>
+      <div id="status-msg">AWAITING ORDERS</div>
+      <div><span class="phase-pill" id="phase-pill">INGRESS</span></div>
+    </div>
+    <div id="turn-disp"><span class="turn-label">TURN</span><span id="turn-num">000</span></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  RENDER ENGINE
+// ═══════════════════════════════════════════════════
+const SCOPE_SIZE = Math.min(Math.floor(Math.min(window.innerWidth * 0.62, window.innerHeight * 0.82)), 500);
+const RADIUS = SCOPE_SIZE / 2, CX = RADIUS, CY = RADIUS;
+const COLS = 18, ROWS = 12;
+const GRID_R = RADIUS * 0.88;
+
+const cBg=document.getElementById('c-bg'), cPhos=document.getElementById('c-phos'),
+      cSweep=document.getElementById('c-sweep'), cUi=document.getElementById('c-ui'),
+      cTop=document.getElementById('c-top');
+[cBg,cPhos,cSweep,cUi,cTop].forEach(c=>{
+  c.width=c.height=SCOPE_SIZE;
+  c.style.width=c.style.height=SCOPE_SIZE+'px';
+});
+document.getElementById('canvas-wrap').style.cssText=
+  `width:${SCOPE_SIZE}px;height:${SCOPE_SIZE}px;`;
+
+const gBg=cBg.getContext('2d'), gPhos=cPhos.getContext('2d'),
+      gSweep=cSweep.getContext('2d'), gUi=cUi.getContext('2d'),
+      gTop=cTop.getContext('2d');
+
+function gridToScope(col,row){
+  const nx=(col/(COLS-1))*2-1, ny=(row/(ROWS-1))*2-1;
+  return {x:CX+nx*GRID_R*0.88, y:CY+ny*GRID_R*0.82};
+}
+
+// ── Sweep ─────────────────────────────────
+let sweepAngle=-Math.PI/2;
+const SWEEP_SPD=0.016;
+const blipBright={};
+
+function drawBg(){
+  gBg.fillStyle='#010d04';
+  gBg.beginPath(); gBg.arc(CX,CY,RADIUS,0,Math.PI*2); gBg.fill();
+  // Concentric rings
+  [0.33,0.66,1.0].forEach((f,i)=>{
+    gBg.beginPath(); gBg.arc(CX,CY,GRID_R*f*0.88,0,Math.PI*2);
+    gBg.strokeStyle=`rgba(0,${100+i*20},30,${0.18-i*0.04})`;
+    gBg.lineWidth=1; gBg.stroke();
+  });
+  // Cross
+  gBg.strokeStyle='rgba(0,100,30,0.16)'; gBg.lineWidth=0.5;
+  gBg.beginPath();
+  gBg.moveTo(CX,CY-RADIUS); gBg.lineTo(CX,CY+RADIUS);
+  gBg.moveTo(CX-RADIUS,CY); gBg.lineTo(CX+RADIUS,CY);
+  gBg.stroke();
+  // Az ticks + cardinal labels
+  for(let a=0;a<360;a+=30){
+    const rad=(a-90)*Math.PI/180;
+    const in_=RADIUS*0.92, out_=RADIUS*0.97;
+    gBg.strokeStyle='rgba(0,160,40,0.30)'; gBg.lineWidth=a%90===0?1.4:0.6;
+    gBg.beginPath();
+    gBg.moveTo(CX+Math.cos(rad)*in_,CY+Math.sin(rad)*in_);
+    gBg.lineTo(CX+Math.cos(rad)*out_,CY+Math.sin(rad)*out_);
+    gBg.stroke();
+    if(a%90===0){
+      const lx=CX+Math.cos(rad)*RADIUS*0.83, ly=CY+Math.sin(rad)*RADIUS*0.83;
+      gBg.fillStyle='rgba(0,180,50,0.28)'; gBg.font='9px Share Tech Mono, Courier New, monospace';
+      gBg.textAlign='center'; gBg.textBaseline='middle';
+      gBg.fillText(['N','E','S','W'][a/90],lx,ly);
+    }
+  }
+  // Center pip
+  gBg.fillStyle='rgba(0,255,80,0.12)';
+  gBg.beginPath(); gBg.arc(CX,CY,2,0,Math.PI*2); gBg.fill();
+}
+
+function drawUiLayer(){
+  gUi.clearRect(0,0,SCOPE_SIZE,SCOPE_SIZE);
+  if(!G) return;
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+    const cell=G.grid[r][c];
+    if(cell.destroyed) continue;
+    if(cell.type===CELL.SAM||cell.type===CELL.RADAR){
+      const {x,y}=gridToScope(c,r);
+      const rng=GRID_R*G.samRange/(COLS/2)*0.88*1.15;
+      const gr=gUi.createRadialGradient(x,y,0,x,y,rng);
+      gr.addColorStop(0,cell.type===CELL.SAM?'rgba(255,40,40,0.09)':'rgba(255,140,0,0.07)');
+      gr.addColorStop(1,'transparent');
+      gUi.fillStyle=gr; gUi.beginPath(); gUi.arc(x,y,rng,0,Math.PI*2); gUi.fill();
+    }
+  }
+}
+
+function drawSweep(){
+  gSweep.clearRect(0,0,SCOPE_SIZE,SCOPE_SIZE);
+  const TRAIL=Math.PI*0.38;
+  // Fading wedge
+  for(let i=0;i<50;i++){
+    const frac=i/50;
+    const a0=sweepAngle-TRAIL*(1-frac);
+    const a1=sweepAngle-TRAIL*(1-(i+1)/50);
+    const alpha=frac*frac*0.16;
+    gSweep.beginPath(); gSweep.moveTo(CX,CY);
+    gSweep.arc(CX,CY,RADIUS*0.96,a0,a1); gSweep.closePath();
+    gSweep.fillStyle=`rgba(0,220,60,${alpha})`; gSweep.fill();
+  }
+  // Leading line
+  gSweep.beginPath(); gSweep.moveTo(CX,CY);
+  gSweep.lineTo(CX+Math.cos(sweepAngle)*RADIUS*0.96, CY+Math.sin(sweepAngle)*RADIUS*0.96);
+  gSweep.strokeStyle='rgba(0,255,80,0.82)'; gSweep.lineWidth=1.5;
+  gSweep.shadowColor='rgba(0,255,80,0.9)'; gSweep.shadowBlur=7;
+  gSweep.stroke(); gSweep.shadowBlur=0;
+}
+
+function decayPhosphor(){
+  gPhos.globalCompositeOperation='destination-in';
+  gPhos.fillStyle='rgba(0,0,0,0.964)';
+  gPhos.fillRect(0,0,SCOPE_SIZE,SCOPE_SIZE);
+  gPhos.globalCompositeOperation='source-over';
+}
+
+function paintBlip(x,y,bright,rgb){
+  const r=3+bright*3.5;
+  const gr=gPhos.createRadialGradient(x,y,0,x,y,r*2.8);
+  gr.addColorStop(0,`rgba(${rgb},${Math.min(1,bright)})`);
+  gr.addColorStop(0.35,`rgba(${rgb},${bright*0.55})`);
+  gr.addColorStop(1,`rgba(${rgb},0)`);
+  gPhos.beginPath(); gPhos.arc(x,y,r*2.8,0,Math.PI*2);
+  gPhos.fillStyle=gr; gPhos.fill();
+  // Bright core
+  gPhos.beginPath(); gPhos.arc(x,y,1.4,0,Math.PI*2);
+  gPhos.fillStyle=`rgba(210,255,225,${bright*0.85})`; gPhos.fill();
+}
+
+function drawTop(){
+  gTop.clearRect(0,0,SCOPE_SIZE,SCOPE_SIZE);
+  if(!G) return;
+
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+    const cell=G.grid[r][c];
+    if(cell.type===CELL.EMPTY||cell.destroyed) continue;
+    const {x,y}=gridToScope(c,r);
+    const key=`${c},${r}`;
+    const bright=blipBright[key]||0;
+    if(bright<0.015) continue;
+
+    const symMap={
+      [CELL.SAM]:   ['255,50,50','▲'],
+      [CELL.RADAR]: ['255,160,0','◉'],
+      [CELL.TARGET]:['255,80,80','✛'],
+      [CELL.TANKER]:['80,160,255','◆'],
+      [CELL.INTERCEPTOR_BASE]:['255,200,0','▷'],
+    };
+    const [rgb,sym]=symMap[cell.type]||['0,255,80','?'];
+
+    if(bright>0.08) paintBlip(x,y,Math.min(1,bright*1.1),rgb);
+
+    gTop.textAlign='center'; gTop.textBaseline='middle';
+    gTop.font=`${10+bright*4}px Share Tech Mono, Courier New, monospace`;
+    gTop.fillStyle=`rgba(${rgb},${0.35+bright*0.65})`;
+    gTop.shadowColor=`rgba(${rgb},${bright*0.7})`; gTop.shadowBlur=5+bright*9;
+    gTop.fillText(sym,x,y); gTop.shadowBlur=0;
+
+    if(bright>0.22){
+      const lbls={[CELL.SAM]:'SAM',[CELL.RADAR]:'RDR',[CELL.TARGET]:'TGT',
+                  [CELL.TANKER]:'TNK',[CELL.INTERCEPTOR_BASE]:'INT'};
+      gTop.font='8px Share Tech Mono, Courier New, monospace'; gTop.textAlign='left'; gTop.textBaseline='top';
+      gTop.fillStyle=`rgba(${rgb},${bright*0.75})`;
+      gTop.fillText(lbls[cell.type]||'',x+9,y-14);
+      gTop.fillText(`${c.toString().padStart(2,'0')}/${String.fromCharCode(65+r)}`,x+9,y-5);
+    }
+  }
+
+  // Active interceptors
+  for(const int of G.interceptors){
+    if(!int.active) continue;
+    const {x,y}=gridToScope(int.c,int.r);
+    paintBlip(x,y,0.65,'255,80,80');
+    gTop.textAlign='center'; gTop.textBaseline='middle';
+    gTop.font='12px Share Tech Mono, Courier New, monospace'; gTop.fillStyle='rgba(255,80,80,0.9)';
+    gTop.shadowColor='rgba(255,80,80,0.8)'; gTop.shadowBlur=12;
+    gTop.fillText('✈',x,y); gTop.shadowBlur=0;
+    gTop.font='8px Share Tech Mono, Courier New, monospace'; gTop.textAlign='left'; gTop.textBaseline='top';
+    gTop.fillStyle='rgba(255,80,80,0.7)'; gTop.fillText('HOT',x+8,y-12);
+  }
+
+  // Player
+  const {x:px,y:py}=gridToScope(G.bx,G.by);
+  // Halo
+  const halo=gTop.createRadialGradient(px,py,0,px,py,22);
+  halo.addColorStop(0,'rgba(0,255,80,0.22)'); halo.addColorStop(1,'transparent');
+  gTop.fillStyle=halo; gTop.beginPath(); gTop.arc(px,py,22,0,Math.PI*2); gTop.fill();
+  // Symbol
+  gTop.textAlign='center'; gTop.textBaseline='middle';
+  gTop.font='bold 15px Share Tech Mono, Courier New, monospace'; gTop.fillStyle='#baffd4';
+  gTop.shadowColor='#00ff52'; gTop.shadowBlur=18;
+  gTop.fillText('✈',px,py); gTop.shadowBlur=0;
+  // Data tag
+  gTop.font='9px Share Tech Mono, Courier New, monospace'; gTop.textAlign='left'; gTop.textBaseline='top';
+  gTop.fillStyle='#aaffcc';
+  gTop.fillText('B-1',px+11,py-17);
+  gTop.fillStyle='rgba(0,220,70,0.7)';
+  gTop.fillText(`${String.fromCharCode(65+G.by)}-${G.bx.toString().padStart(2,'0')}`,px+11,py-7);
+  gTop.fillText(`FL:${Math.floor(G.fuel)}%`,px+11,py+3);
+
+  // Adjacent cell hints
+  if(G.phase!=='COMPLETE'){
+    gTop.strokeStyle='rgba(0,200,60,0.22)'; gTop.lineWidth=1; gTop.setLineDash([2,3]);
+    for(const [dx,dy] of[[-1,0],[1,0],[0,-1],[0,1]]){
+      const nc=G.bx+dx,nr=G.by+dy;
+      if(nc<0||nc>=COLS||nr<0||nr>=ROWS) continue;
+      const {x:ax,y:ay}=gridToScope(nc,nr);
+      gTop.beginPath(); gTop.arc(ax,ay,9,0,Math.PI*2); gTop.stroke();
+    }
+    gTop.setLineDash([]);
+  }
+
+  // Hover
+  if(hoverCell){
+    const {x:hx,y:hy}=gridToScope(hoverCell.c,hoverCell.r);
+    gTop.strokeStyle='rgba(0,255,80,0.45)'; gTop.lineWidth=1;
+    gTop.beginPath(); gTop.arc(hx,hy,11,0,Math.PI*2); gTop.stroke();
+  }
+}
+
+function checkSweepContacts(){
+  if(!G) return;
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+    const cell=G.grid[r][c];
+    if(cell.type===CELL.EMPTY||cell.destroyed) continue;
+    const {x,y}=gridToScope(c,r);
+    let diff=sweepAngle-Math.atan2(y-CY,x-CX);
+    while(diff>Math.PI) diff-=Math.PI*2;
+    while(diff<-Math.PI) diff+=Math.PI*2;
+    if(diff>=0&&diff<0.065){ blipBright[`${c},${r}`]=1.0; SFX.contactBlip(); }
+  }
+  for(const int of G.interceptors){
+    if(!int.active) continue;
+    const {x,y}=gridToScope(int.c,int.r);
+    let diff=sweepAngle-Math.atan2(y-CY,x-CX);
+    while(diff>Math.PI) diff-=Math.PI*2;
+    while(diff<-Math.PI) diff+=Math.PI*2;
+    if(diff>=0&&diff<0.065) blipBright[`int_${int.baseC}_${int.baseR}`]=1.0;
+  }
+}
+
+function decayBlips(){
+  for(const k in blipBright){ blipBright[k]*=0.989; if(blipBright[k]<0.01) delete blipBright[k]; }
+}
+
+let lastTs=0;
+function renderLoop(ts){
+  requestAnimationFrame(renderLoop);
+  if(ts-lastTs<15) return; lastTs=ts;
+  sweepAngle+=SWEEP_SPD;
+  if(sweepAngle>Math.PI) sweepAngle-=Math.PI*2;
+  // Ping near 12-o'clock (top of sweep)
+  if(sweepAngle>-0.05&&sweepAngle<0.05) SFX.sweepPing();
+  checkSweepContacts();
+  decayBlips();
+  decayPhosphor();
+  drawSweep();
+  drawTop();
+}
+
+// ── Mouse ─────────────────────────────────
+let hoverCell=null;
+function nearestCell(cx,cy){
+  const rect=cTop.getBoundingClientRect();
+  const sx=cx-rect.left, sy=cy-rect.top;
+  let best=Infinity,bc=-1,br=-1;
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+    const {x,y}=gridToScope(c,r);
+    const d=Math.hypot(sx-x,sy-y);
+    if(d<best){best=d;bc=c;br=r;}
+  }
+  return best<30?{c:bc,r:br}:null;
+}
+cTop.addEventListener('mousemove',e=>{hoverCell=nearestCell(e.clientX,e.clientY);});
+cTop.addEventListener('mouseleave',()=>{hoverCell=null;});
+cTop.addEventListener('click',e=>{
+  if(!G||G.phase==='COMPLETE') return;
+  const cell=nearestCell(e.clientX,e.clientY);
+  if(!cell) return;
+  const dc=cell.c-G.bx,dr=cell.r-G.by;
+  if(Math.abs(dc)<=1&&Math.abs(dr)<=1&&(dc||dr)) playerMove(dc,dr);
+});
+
+// ═══════════════════════════════════════════════════
+//  GAME LOGIC
+// ═══════════════════════════════════════════════════
+const CELL={EMPTY:0,SAM:1,INTERCEPTOR_BASE:2,TARGET:3,TANKER:4,RADAR:5};
+let G=null;
+
+function initGame(){
+  SFX.stopFuelWarn();
+  SFX.stopIntAlarm();
+  const diff=document.getElementById('diff-sel').value;
+  const cfg={
+    easy:  {samCount:3, radarCount:2,intCount:2,samRange:1},
+    medium:{samCount:6, radarCount:3,intCount:3,samRange:2},
+    hard:  {samCount:10,radarCount:4,intCount:5,samRange:2},
+  }[diff];
+  G={turn:0,phase:'INGRESS',diff,...cfg,
+     bx:0,by:Math.floor(ROWS/2),fuel:100,hull:100,
+     payload:3,payloadMax:3,ecm:false,tf:false,ab:false,
+     grid:[],targets:[],targetsDestroyed:0,interceptors:[],
+     score:0,threats:[]};
+  buildMap();
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) blipBright[`${c},${r}`]=0;
+  drawUiLayer(); updateHud();
+  logLines=[];
+  addLog('MISSION INITIATED — INGRESSING SOVIET AIRSPACE','hot');
+  addLog(`TARGETS: 3  PAYLOAD: ${G.payloadMax}  DIFFICULTY: ${diff.toUpperCase()}`,'warn');
+  addLog('NAVIGATE: ARROW KEYS · WASD · SCOPE CLICK','');
+}
+
+function buildMap(){
+  for(let r=0;r<ROWS;r++){G.grid[r]=[];for(let c=0;c<COLS;c++) G.grid[r][c]={type:CELL.EMPTY,destroyed:false};}
+  const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+  const place=(type,mn,mx)=>{
+    for(let i=0;i<200;i++){const c=rnd(mn,mx),r=rnd(0,ROWS-1);
+      if(G.grid[r][c].type===CELL.EMPTY&&!(r===G.by&&c<=1)){G.grid[r][c]={type,destroyed:false};return{r,c};}}
+    return null;
+  };
+  G.targets=[];
+  for(let i=0;i<3;i++){const p=place(CELL.TARGET,Math.floor(COLS*0.6),COLS-2);if(p)G.targets.push({...p,destroyed:false});}
+  for(let i=0;i<G.samCount;i++) place(CELL.SAM,3,COLS-2);
+  for(let i=0;i<G.radarCount;i++) place(CELL.RADAR,3,COLS-2);
+  for(let i=0;i<G.intCount;i++){const p=place(CELL.INTERCEPTOR_BASE,4,COLS-2);
+    if(p) G.interceptors.push({r:p.r,c:p.c,baseR:p.r,baseC:p.c,active:false,fuel:8});}
+  place(CELL.TANKER,2,Math.floor(COLS*0.45));
+  place(CELL.TANKER,Math.floor(COLS*0.5),COLS-3);
+}
+
+function playerMove(dx,dy){
+  if(!G||G.phase==='COMPLETE') return;
+  const nx=G.bx+dx,ny=G.by+dy;
+  if(nx<0){doEgress();return;}
+  if(nx>=COLS||ny<0||ny>=ROWS) return;
+  G.bx=nx; G.by=ny; G.turn++;
+  SFX.navMove();
+  burnFuel(); if(!alive()) return;
+  const cell=G.grid[G.by][G.bx];
+  if(cell.type===CELL.TANKER&&!cell.destroyed){
+    const rf=Math.min(100-G.fuel,38); G.fuel=Math.min(100,G.fuel+rf);
+    cell.destroyed=true;
+    SFX.refuel();
+    addLog(`AERIAL REFUEL +${rf}% FUEL`,'hot');
+  }
+  // Fuel warning
+  if(G.fuel<20) SFX.startFuelWarn(); else SFX.stopFuelWarn();
+  processThreats(); moveInterceptors(); drawUiLayer(); updateHud();
+}
+
+function burnFuel(){
+  let r=4; if(G.ecm)r+=2; if(G.ab)r+=5; if(G.tf)r+=1;
+  G.fuel=Math.max(0,G.fuel-r);
+}
+function alive(){
+  if(G.hull<=0){endGame(false,'AIRCRAFT DESTROYED');return false;}
+  if(G.fuel<=0){endGame(false,'FUEL EXHAUSTION — CREW LOST');return false;}
+  return true;
+}
+
+function releaseBomb(){
+  if(!G||G.phase==='COMPLETE') return;
+  if(G.payload<=0){addLog('NO WEAPONS REMAINING','warn');return;}
+  const tgt=G.targets.find(t=>t.r===G.by&&t.c===G.bx&&!t.destroyed);
+  if(!tgt){addLog('NO TARGET AT CURRENT POSITION','warn');return;}
+  const acc=75+(G.ecm?5:0)+(G.tf?5:-5);
+  if(Math.random()*100<acc){
+    SFX.weaponRelease();
+    setTimeout(()=>SFX.detonation(), 1100);
+    tgt.destroyed=true; G.grid[G.by][G.bx].destroyed=true;
+    G.payload--; G.targetsDestroyed++; G.score+=500;
+    addLog(`WEAPON IMPACT CONFIRMED — TARGET ${G.targetsDestroyed}/${G.targets.length} DESTROYED`,'hot');
+    if(G.targetsDestroyed>=G.targets.length){G.phase='EGRESS';addLog('ALL TARGETS NEUTRALIZED — EGRESS WEST','hot');}
+  } else {
+    SFX.weaponMiss();
+    G.payload--; addLog('WEAPON MISS — ORDNANCE EXPENDED','warn');
+  }
+  G.turn++; burnFuel(); processThreats(); drawUiLayer(); updateHud();
+}
+
+function doEgress(){
+  if(!G||G.phase==='COMPLETE') return;
+  if(G.phase==='INGRESS'&&G.targetsDestroyed===0){addLog('CANNOT EGRESS — OBJECTIVES INCOMPLETE','warn');return;}
+  G.score+=G.payload*100+Math.floor(G.fuel);
+  SFX.egressConfirm();
+  SFX.stopFuelWarn();
+  SFX.stopIntAlarm();
+  addLog('EXITING SOVIET AIRSPACE — EGRESS WEST CONFIRMED','hot');
+  endGame(true);
+}
+
+function processThreats(){
+  G.threats=[];
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+    const cell=G.grid[r][c]; if(cell.destroyed) continue;
+    if(cell.type!==CELL.SAM&&cell.type!==CELL.RADAR) continue;
+    const dist=Math.max(Math.abs(r-G.by),Math.abs(c-G.bx));
+    if(dist>G.samRange) continue;
+    G.threats.push({type:cell.type===CELL.SAM?'SAM':'RDR',dist});
+    if(cell.type===CELL.SAM){
+      let ph=dist===0?.70:dist===1?.44:.22;
+      if(G.ecm)ph*=0.48; if(G.tf)ph*=0.72;
+      if(Math.random()<ph){
+        SFX.samLaunch();
+        setTimeout(()=>SFX.hullHit(), 320);
+        const dmg=rnd(14,32); G.hull=Math.max(0,G.hull-dmg); G.score-=40;
+        addLog(`SAM IMPACT — HULL DAMAGE -${dmg}%`,'hot'); if(!alive())return;
+      } else if(Math.random()<0.35){
+        SFX.samLaunch();
+        setTimeout(()=>SFX.nearMiss(), 280);
+        addLog('SAM NEAR MISS — EVADING','warn');
+      }
+    }
+    if(cell.type===CELL.RADAR){
+      for(const int of G.interceptors){
+        if(!int.active&&Math.max(Math.abs(int.baseR-r),Math.abs(int.baseC-c))<7&&Math.random()<0.38){
+          int.active=true;
+          SFX.startIntAlarm();
+          addLog(`INTERCEPTOR SCRAMBLED [${int.baseC},${int.baseR}]`,'warn');
+        }
+      }
+    }
+  }
+  for(const int of G.interceptors){
+    if(!int.active) continue;
+    const dist=Math.max(Math.abs(int.r-G.by),Math.abs(int.c-G.bx));
+    if(dist<=1){
+      G.threats.push({type:'INTERCEPTOR',dist});
+      let ph=0.34; if(G.ecm)ph*=0.6; if(G.ab)ph*=0.45;
+      if(Math.random()<ph){
+        SFX.hullHit();
+        const dmg=rnd(10,26); G.hull=Math.max(0,G.hull-dmg);
+        addLog(`INTERCEPTOR CANNON HIT — HULL -${dmg}%`,'hot'); if(!alive())return;
+      } else {
+        SFX.nearMiss();
+        addLog('INTERCEPTOR ATTACK — EVADED','warn');
+      }
+    }
+  }
+  // Stop alarm if no active interceptors
+  if(!G.interceptors.some(i=>i.active)) SFX.stopIntAlarm();
+  renderThreatBoard();
+}
+
+function moveInterceptors(){
+  for(const int of G.interceptors){
+    if(!int.active) continue;
+    if(--int.fuel<=0){int.active=false;int.r=int.baseR;int.c=int.baseC;int.fuel=8;addLog('INTERCEPTOR RTB','');continue;}
+    const dr=G.by-int.r,dc=G.bx-int.c;
+    if(Math.abs(dr)>=Math.abs(dc)) int.r+=Math.sign(dr); else int.c+=Math.sign(dc);
+    int.r=Math.max(0,Math.min(ROWS-1,int.r)); int.c=Math.max(0,Math.min(COLS-1,int.c));
+  }
+}
+
+function endGame(win,reason=''){
+  G.phase='COMPLETE';
+  SFX.stopFuelWarn();
+  SFX.stopIntAlarm();
+  setTimeout(()=>{ win ? SFX.missionSuccess() : SFX.missionFail(); }, 400);
+  const ov=document.getElementById('game-overlay');
+  document.getElementById('go-title').textContent=win?'MISSION SUCCESS':'AIRCRAFT LOST';
+  document.getElementById('go-title').className=win?'win':'loss';
+  document.getElementById('go-body').innerHTML=win
+    ?`All designated targets neutralized.<br>B-1 crew survival confirmed.<br>Aircraft exited Soviet airspace.`
+    :`${reason}<br>Targets destroyed: ${G.targetsDestroyed}/${G.targets.length}<br>Hull at loss: ${Math.floor(G.hull)}%`;
+  document.getElementById('go-score').textContent=`SCORE: ${G.score.toString().padStart(6,'0')}`;
+  ov.classList.add('show'); updateHud();
+}
+
+function toggleSys(sys){
+  if(!G||G.phase==='COMPLETE') return;
+  G[sys]=!G[sys];
+  G[sys] ? SFX.sysArm() : SFX.sysDisarm();
+  const btn=document.getElementById(`sb-${sys}`);
+  btn.classList.toggle('active',G[sys]); btn.textContent=G[sys]?'DISARM':'ARM';
+  addLog(`${({ecm:'ECM SUITE',tf:'TERRAIN FOLLOW',ab:'AFTERBURNER'})[sys]}: ${G[sys]?'ACTIVATED':'DEACTIVATED'}`,G[sys]?'warn':'');
+}
+
+function updateHud(){
+  if(!G) return;
+  const setBar=(id,pct,pid,lbl)=>{
+    const f=document.getElementById(id); f.style.width=pct+'%';
+    f.className='bar-fill'+(pct<20?' crit':pct<40?' warn':'');
+    document.getElementById(pid).textContent=lbl||Math.floor(pct)+'%';
+  };
+  setBar('bf-fuel',G.fuel,'pct-fuel');
+  setBar('bf-hull',G.hull,'pct-hull');
+  setBar('bf-pay',(G.payload/G.payloadMax)*100,'pct-pay',`${G.payload}/${G.payloadMax}`);
+  document.getElementById('dv-grid').textContent=`${String.fromCharCode(65+G.by)}-${G.bx.toString().padStart(2,'0')}`;
+  document.getElementById('dv-tgt').textContent=`${G.targetsDestroyed}/${G.targets.length}`;
+  document.getElementById('turn-num').textContent=G.turn.toString().padStart(3,'0');
+  document.getElementById('phase-pill').textContent=G.phase;
+  const atTgt=G.targets.some(t=>t.r===G.by&&t.c===G.bx&&!t.destroyed);
+  document.getElementById('ab-bomb').disabled=!atTgt||G.payload<=0;
+  document.getElementById('ab-egress').disabled=G.phase==='INGRESS'&&G.targetsDestroyed===0;
+  const msg=document.getElementById('status-msg');
+  if(G.fuel<20){msg.textContent='⚠ FUEL CRITICAL';msg.className='crit';}
+  else if(G.hull<30){msg.textContent='⚠ HULL CRITICAL';msg.className='crit';}
+  else if(G.threats&&G.threats.length){msg.textContent=`⚠ ${G.threats.length} THREAT(S) ACTIVE`;msg.className='warn';}
+  else if(G.phase==='EGRESS'){msg.textContent='EGRESS WEST NOW';msg.className='warn';}
+  else{msg.textContent='SYSTEMS NOMINAL';msg.className='';}
+}
+
+let logLines=[];
+function addLog(msg,type=''){
+  const t=G?`T+${G.turn.toString().padStart(3,'0')}`:'---';
+  logLines.unshift({msg,type,t}); if(logLines.length>60) logLines.pop();
+  renderThreatBoard();
+}
+function renderThreatBoard(){
+  const b=document.getElementById('threat-board');
+  if(!logLines.length){b.innerHTML='<div class="no-contact">NO CONTACTS DETECTED</div>';return;}
+  b.innerHTML=logLines.slice(0,18).map(l=>`<div class="threat-line ${l.type}"><span class="tl-time">${l.t}</span> ${l.msg}</div>`).join('');
+}
+
+document.addEventListener('keydown',e=>{
+  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
+  if(!G||G.phase==='COMPLETE') return;
+  const kmap={'ArrowUp':'n','ArrowDown':'s','ArrowLeft':'w','ArrowRight':'e',
+               'w':'n','s':'s','a':'w','d':'e','W':'n','S':'s','A':'w','D':'e'};
+  const mmap={n:[0,-1],s:[0,1],w:[-1,0],e:[1,0]};
+  const dir=kmap[e.key];
+  if(dir){const[dx,dy]=mmap[dir];playerMove(dx,dy);flashKey(`kp-${dir}`);}
+  if(e.key===' ') releaseBomb();
+  if(e.key==='e'||e.key==='E') doEgress();
+  if(e.key==='1') toggleSys('ecm');
+  if(e.key==='2') toggleSys('tf');
+  if(e.key==='3') toggleSys('ab');
+});
+
+function flashKey(id){
+  const el=document.getElementById(id); if(!el) return;
+  el.classList.add('pressed'); setTimeout(()=>el.classList.remove('pressed'),120);
+}
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+
+function beginMission(){
+  document.getElementById('intro-screen').style.display='none';
+  document.getElementById('game-overlay').classList.remove('show');
+  SFX.resume();
+  initGame();
+}
+
+window.addEventListener('load',()=>{
+  drawBg();
+  requestAnimationFrame(renderLoop);
+  document.querySelectorAll('.knob').forEach(k=>{
+    k.addEventListener('click',function(){
+      const cur=parseFloat((this.style.transform||'rotate(0deg)').replace(/[^0-9.\-]/g,''))||0;
+      this.style.transform=`rotate(${cur+30}deg)`;
+      SFX.knob();
+    });
+  });
+  document.querySelectorAll('.switch').forEach(s=>s.addEventListener('click',function(){
+    this.classList.toggle('on');
+    SFX.switchClick();
+  }));
+});
+
+// ═══════════════════════════════════════════════════
+//  SOUND ENGINE  —  Web Audio API, fully synthesized
+//  All sounds built from oscillators + filtered noise.
+//  No external files. Designed for 1970s–80s military
+//  electronics aesthetic: sine/square tones, bandpass
+//  noise bursts, envelope shaping.
+// ═══════════════════════════════════════════════════
+const SFX = (() => {
+  let ctx = null;
+  let masterGain = null;
+  // Sweep ping throttle — only fire once per sweep revolution
+  let lastSweepPing = 0;
+  // Interceptor alarm oscillator (looping)
+  let intAlarmNode = null;
+  let intAlarmActive = false;
+
+  function getCtx() {
+    if (!ctx) {
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      masterGain = ctx.createGain();
+      masterGain.gain.value = 0.55;
+      masterGain.connect(ctx.destination);
+    }
+    return ctx;
+  }
+
+  function resume() {
+    getCtx();
+    if (ctx.state === 'suspended') ctx.resume();
+  }
+
+  // ── Utility builders ────────────────────────────
+
+  // Create a gain node connected to master
+  function makeGain(value = 1) {
+    const g = ctx.createGain();
+    g.gain.value = value;
+    g.connect(masterGain);
+    return g;
+  }
+
+  // Oscillator → gain, auto-stopped
+  function osc(type, freq, startTime, duration, peakGain, gainNode) {
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = type;
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0, startTime);
+    g.gain.linearRampToValueAtTime(peakGain, startTime + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+    o.connect(g);
+    g.connect(gainNode);
+    o.start(startTime);
+    o.stop(startTime + duration + 0.01);
+    return o;
+  }
+
+  // White noise burst through a bandpass filter
+  function noiseBurst(startTime, duration, filterFreq, filterQ, peakGain, gainNode) {
+    const bufSize = ctx.sampleRate * duration;
+    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+
+    const filt = ctx.createBiquadFilter();
+    filt.type = 'bandpass';
+    filt.frequency.value = filterFreq;
+    filt.Q.value = filterQ;
+
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(peakGain, startTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+    src.connect(filt);
+    filt.connect(g);
+    g.connect(gainNode);
+    src.start(startTime);
+    src.stop(startTime + duration);
+  }
+
+  // Low-frequency rumble (detonation sub-bass)
+  function rumble(startTime, duration, gainNode) {
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(60, startTime);
+    o.frequency.exponentialRampToValueAtTime(18, startTime + duration);
+    g.gain.setValueAtTime(0, startTime);
+    g.gain.linearRampToValueAtTime(0.9, startTime + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+    // Heavy lowpass
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 120;
+    o.connect(lp); lp.connect(g); g.connect(gainNode);
+    o.start(startTime); o.stop(startTime + duration + 0.02);
+  }
+
+  // ── SOUNDS ──────────────────────────────────────
+
+  // Radar sweep ping — soft sine blip, very short
+  // Fires once per sweep revolution near the 12-o'clock position
+  function sweepPing() {
+    getCtx();
+    const now = ctx.currentTime;
+    if (now - lastSweepPing < 1.8) return; // throttle
+    lastSweepPing = now;
+
+    const g = makeGain(0.18);
+    // Main ping tone
+    const o = ctx.createOscillator();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(1420, now);
+    o.frequency.exponentialRampToValueAtTime(980, now + 0.12);
+    const og = ctx.createGain();
+    og.gain.setValueAtTime(0, now);
+    og.gain.linearRampToValueAtTime(1, now + 0.005);
+    og.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+    o.connect(og); og.connect(g);
+    o.start(now); o.stop(now + 0.2);
+
+    // Subtle harmonic shimmer
+    const o2 = ctx.createOscillator();
+    o2.type = 'sine';
+    o2.frequency.setValueAtTime(2840, now);
+    o2.frequency.exponentialRampToValueAtTime(1960, now + 0.10);
+    const og2 = ctx.createGain();
+    og2.gain.setValueAtTime(0, now);
+    og2.gain.linearRampToValueAtTime(0.2, now + 0.004);
+    og2.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+    o2.connect(og2); og2.connect(g);
+    o2.start(now); o2.stop(now + 0.14);
+  }
+
+  // Contact detected — blip refresh (quiet double-beep when sweep illuminates a contact)
+  function contactBlip() {
+    getCtx();
+    const now = ctx.currentTime;
+    const g = makeGain(0.09);
+    [0, 0.07].forEach(offset => {
+      osc('sine', 1800, now + offset, 0.055, 1, g);
+    });
+  }
+
+  // Navigation move — subtle mechanical click + low tone
+  function navMove() {
+    getCtx();
+    const now = ctx.currentTime;
+    const g = makeGain(0.35);
+    // Click transient
+    noiseBurst(now, 0.025, 3200, 0.5, 0.6, g);
+    // Low confirmation tone
+    osc('sine', 220, now + 0.01, 0.06, 0.4, g);
+  }
+
+  // System ARM — rising two-tone confirm
+  function sysArm() {
+    getCtx();
+    const now = ctx.currentTime;
+    const g = makeGain(0.4);
+    osc('square', 440, now,        0.08, 0.3, g);
+    osc('square', 660, now + 0.09, 0.10, 0.4, g);
+    osc('sine',   880, now + 0.20, 0.12, 0.5, g);
+  }
+
+  // System DISARM — falling two-tone
+  function sysDisarm() {
+    getCtx();
+    const now = ctx.currentTime;
+    const g = makeGain(0.35);
+    osc('square', 660, now,        0.08, 0.35, g);
+    osc('square', 440, now + 0.09, 0.10, 0.28, g);
+  }
+
+  // Hardware toggle switch click
+  function switchClick() {
+    getCtx();
+    const now = ctx.currentTime;
+    const g = makeGain(0.25);
+    noiseBurst(now,        0.012, 4000, 0.4, 1.0, g);
+    noiseBurst(now + 0.018, 0.008, 2000, 0.6, 0.5, g);
+  }
+
+  // Knob click — very short mechanical tick
+  function knob() {
+    getCtx();
+    const now = ctx.currentTime;
+    const g = makeGain(0.18);
+    noiseBurst(now, 0.018, 3500, 0.3, 0.8, g);
+  }
+
+  // SAM launch warning — fast rising tone, urgent
+  function samLaunch() {
+    getCtx();
+    const now = ctx.currentTime;
+    const g = makeGain(0.55);
+    // Rising sweep tone
+    const o = ctx.createOscillator();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(280, now);
+    o.frequency.exponentialRampToValueAtTime(1800, now + 0.22);
+    const og = ctx.createGain();
+    og.gain.setValueAtTime(0.8, now);
+    og.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+    // Slight distortion via waveshaper
+    const ws = ctx.createWaveShaper();
+    const curve = new Float32Array(256);
+    for (let i = 0; i < 256; i++) {
+      const x = (i * 2) / 256 - 1;
+      curve[i] = (Math.PI + 80) * x / (Math.PI + 80 * Math.abs(x));
+    }
+    ws.curve = curve;
+    o.connect(ws); ws.connect(og); og.connect(g);
+    o.start(now); o.stop(now + 0.28);
+    // High noise burst
+    noiseBurst(now, 0.2, 6000, 1.5, 0.4, g);
+  }
+
+  // Near miss — fast Doppler-like sweep downward
+  function nearMiss() {
+    getCtx();
+    const now = ctx.currentTime;
+    const g = makeGain(0.38);
+    const o = ctx.createOscillator();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(1200, now);
+    o.frequency.exponentialRampToValueAtTime(180, now + 0.35);
+    const og = ctx.createGain();
+    og.gain.setValueAtTime(0.7, now);
+    og.gain.exponentialRampToValueAtTime(0.0001, now + 0.38);
+    o.connect(og); og.connect(g);
+    o.start(now); o.stop(now + 0.4);
+    noiseBurst(now + 0.05, 0.2, 1800, 2, 0.25, g);
+  }
+
+  // Hull hit — sharp impact noise + low thud
+  function hullHit() {
+    getCtx();
+    const now = ctx.currentTime;
+    const g = makeGain(0.7);
+    // Impact crack
+    noiseBurst(now, 0.04, 800, 0.3, 1.0, g);
+    noiseBurst(now, 0.08, 200, 0.5, 0.9, g);
+    // Low thud
+    rumble(now + 0.02, 0.5, g);
+    // Structural groan — descending sine
+    osc('sine', 160, now + 0.05, 0.4, 0.5, g);
+  }
+
+  // Weapon release — payload drop sequence
+  function weaponRelease() {
+    getCtx();
+    const now = ctx.currentTime;
+    const g = makeGain(0.65);
+    // Arming tone sequence — three ascending beeps
+    [0, 0.12, 0.24].forEach((t, i) => {
+      osc('square', 440 + i * 220, now + t, 0.09, 0.5, g);
+    });
+    // Release clunk
+    noiseBurst(now + 0.38, 0.06, 400, 0.4, 0.8, g);
+    // Descending Doppler tone (bomb away)
+    const od = ctx.createOscillator();
+    od.type = 'sine';
+    od.frequency.setValueAtTime(900, now + 0.42);
+    od.frequency.exponentialRampToValueAtTime(120, now + 1.4);
+    const ogd = ctx.createGain();
+    ogd.gain.setValueAtTime(0.5, now + 0.42);
+    ogd.gain.exponentialRampToValueAtTime(0.0001, now + 1.5);
+    od.connect(ogd); ogd.connect(g);
+    od.start(now + 0.42); od.stop(now + 1.55);
+  }
+
+  // Nuclear detonation — rumble + blast
+  function detonation() {
+    getCtx();
+    const now = ctx.currentTime;
+    const g = makeGain(0.9);
+    // Initial crack
+    noiseBurst(now, 0.05, 1200, 0.2, 1.0, g);
+    // Bass shockwave
+    rumble(now + 0.04, 1.8, g);
+    // Broadband explosion noise
+    noiseBurst(now + 0.04, 0.8, 400, 0.2, 0.85, g);
+    noiseBurst(now + 0.06, 1.2, 150, 0.3, 0.7, g);
+    // Rising pressure whine
+    const ow = ctx.createOscillator();
+    ow.type = 'sawtooth';
+    ow.frequency.setValueAtTime(40, now + 0.1);
+    ow.frequency.exponentialRampToValueAtTime(320, now + 0.6);
+    ow.frequency.exponentialRampToValueAtTime(60, now + 1.8);
+    const ogw = ctx.createGain();
+    ogw.gain.setValueAtTime(0.6, now + 0.1);
+    ogw.gain.exponentialRampToValueAtTime(0.0001, now + 2.0);
+    const lp = ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=600;
+    ow.connect(lp); lp.connect(ogw); ogw.connect(g);
+    ow.start(now + 0.1); ow.stop(now + 2.1);
+  }
+
+  // Weapon miss — descending fail tone
+  function weaponMiss() {
+    getCtx();
+    const now = ctx.currentTime;
+    const g = makeGain(0.45);
+    osc('square', 440, now,        0.10, 0.4, g);
+    osc('square', 330, now + 0.12, 0.10, 0.4, g);
+    osc('square', 220, now + 0.25, 0.14, 0.4, g);
+    noiseBurst(now + 0.28, 0.1, 600, 1, 0.3, g);
+  }
+
+  // Refuel complete — smooth ascending confirmation
+  function refuel() {
+    getCtx();
+    const now = ctx.currentTime;
+    const g = makeGain(0.45);
+    // Smooth rising chord
+    [261.6, 329.6, 392, 523.2].forEach((freq, i) => {
+      osc('sine', freq, now + i * 0.1, 0.3, 0.5, g);
+    });
+  }
+
+  // Interceptor alarm — pulsing rapid alert (looping while active)
+  function startIntAlarm() {
+    if (intAlarmActive) return;
+    getCtx();
+    intAlarmActive = true;
+    let beat = 0;
+
+    function pulse() {
+      if (!intAlarmActive) return;
+      const now = ctx.currentTime;
+      const g = makeGain(0.38);
+      osc('square', 880, now,       0.06, 0.7, g);
+      osc('square', 1100, now+0.08, 0.05, 0.6, g);
+      setTimeout(pulse, 260);
+    }
+    pulse();
+  }
+
+  function stopIntAlarm() {
+    intAlarmActive = false;
+  }
+
+  // Mission success fanfare
+  function missionSuccess() {
+    getCtx();
+    const now = ctx.currentTime;
+    const g = makeGain(0.6);
+    // Ascending arpeggio
+    const notes = [261.6, 329.6, 392, 523.2, 659.2, 784, 1046.5];
+    notes.forEach((freq, i) => {
+      osc('sine',   freq, now + i * 0.12, 0.25, 0.6, g);
+      osc('square', freq, now + i * 0.12, 0.20, 0.15, g);
+    });
+    // Final chord sustain
+    [523.2, 659.2, 784].forEach(f => osc('sine', f, now + 1.0, 0.8, 0.4, g));
+  }
+
+  // Mission failure — descending dirge
+  function missionFail() {
+    getCtx();
+    const now = ctx.currentTime;
+    const g = makeGain(0.6);
+    const notes = [440, 370, 311, 262, 220];
+    notes.forEach((freq, i) => {
+      osc('square', freq, now + i * 0.22, 0.28, 0.5, g);
+      osc('sine',   freq * 0.5, now + i * 0.22, 0.30, 0.3, g);
+    });
+    // Final low drone
+    osc('sawtooth', 55, now + 1.2, 1.2, 0.4, g);
+    noiseBurst(now + 1.2, 1.0, 300, 0.5, 0.3, g);
+  }
+
+  // Fuel critical warning — repeating two-tone alert
+  let fuelWarnTimer = null;
+  function startFuelWarn() {
+    if (fuelWarnTimer) return;
+    getCtx();
+    function beep() {
+      if (!G || G.fuel >= 20 || G.phase === 'COMPLETE') {
+        fuelWarnTimer = null; return;
+      }
+      const now = ctx.currentTime;
+      const g = makeGain(0.30);
+      osc('square', 660, now,       0.07, 0.6, g);
+      osc('square', 550, now + 0.1, 0.07, 0.5, g);
+      fuelWarnTimer = setTimeout(beep, 1800);
+    }
+    beep();
+  }
+  function stopFuelWarn() {
+    if (fuelWarnTimer) { clearTimeout(fuelWarnTimer); fuelWarnTimer = null; }
+  }
+
+  // Egress confirmation — distinctive three-tone
+  function egressConfirm() {
+    getCtx();
+    const now = ctx.currentTime;
+    const g = makeGain(0.5);
+    osc('sine', 880, now,        0.12, 0.6, g);
+    osc('sine', 1100, now + 0.14, 0.12, 0.7, g);
+    osc('sine', 1320, now + 0.28, 0.18, 0.8, g);
+  }
+
+  function setVolume(v) {
+    getCtx();
+    masterGain.gain.setTargetAtTime(v * 0.55, ctx.currentTime, 0.05);
+    const lbl = document.getElementById('vol-label');
+    if (lbl) lbl.textContent = Math.round(v * 100);
+  }
+
+  return {
+    resume, sweepPing, contactBlip, navMove,
+    sysArm, sysDisarm, switchClick, knob,
+    samLaunch, nearMiss, hullHit,
+    weaponRelease, detonation, weaponMiss,
+    refuel, startIntAlarm, stopIntAlarm,
+    missionSuccess, missionFail,
+    startFuelWarn, stopFuelWarn, egressConfirm,
+    setVolume,
+  };
+})();
+</script>
+
+</body>
+</html>
