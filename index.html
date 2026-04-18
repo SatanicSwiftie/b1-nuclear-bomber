@@ -91,7 +91,7 @@ padding:10px;cursor:pointer;transition:all .2s;margin-top:auto;}
 
 /* Top bar */
 #top-bar{width:100%;background:var(–bezel);border-bottom:1px solid var(–p2);
-padding:4px 16px;display:flex;align-items:center;justify-content:space-between;
+padding:3px 12px;display:flex;align-items:center;justify-content:space-between;
 flex-shrink:0;}
 .top-bar-item{display:flex;flex-direction:column;align-items:center;gap:1px;}
 .tbi-label{font-size:7px;letter-spacing:2px;color:var(–p3);}
@@ -105,8 +105,8 @@ animation:crit .5s step-end infinite;}
 
 /* Main display area */
 #display-area{flex:1;display:grid;overflow:hidden;
-grid-template-columns:1fr 320px;
-grid-template-rows:1fr 200px;}
+grid-template-columns:1fr 260px;
+grid-template-rows:1fr 160px;}
 
 /* Map panel */
 #map-panel{position:relative;background:var(–p0);border-right:1px solid var(–p2);
@@ -125,14 +125,14 @@ padding:3px 8px;cursor:pointer;display:none;}
 #instruments{background:var(–bezel2);border-bottom:1px solid var(–p2);
 display:flex;flex-direction:column;gap:0;overflow:hidden;}
 
-.inst-section{border-bottom:1px solid rgba(0,80,20,.4);padding:8px 10px;}
+.inst-section{border-bottom:1px solid rgba(0,80,20,.4);padding:5px 8px;}
 .inst-section:last-child{border-bottom:none;flex:1;}
-.inst-label{font-size:7px;letter-spacing:3px;color:var(–p3);margin-bottom:6px;}
+.inst-label{font-size:7px;letter-spacing:2px;color:var(–p3);margin-bottom:4px;}
 
 /* Gauge bars */
-.gauge-row{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
-.gauge-name{font-size:8px;color:var(–dim);width:60px;flex-shrink:0;letter-spacing:1px;}
-.gauge-track{flex:1;height:6px;background:rgba(0,30,10,.8);border:1px solid var(–p2);
+.gauge-row{display:flex;align-items:center;gap:4px;margin-bottom:3px;}
+.gauge-name{font-size:8px;color:var(–dim);width:52px;flex-shrink:0;letter-spacing:0px;}
+.gauge-track{flex:1;height:5px;background:rgba(0,30,10,.8);border:1px solid var(–p2);
 position:relative;overflow:hidden;}
 .gauge-fill{height:100%;background:var(–p5);box-shadow:0 0 4px var(–p5);
 transition:width .5s,background .5s;}
@@ -182,13 +182,13 @@ box-shadow:0 0 6px var(–red);}
 #comms-panel{background:var(–panel2);border-right:1px solid var(–p2);
 overflow:hidden;display:flex;flex-direction:column;}
 .comms-header{font-size:7px;letter-spacing:3px;color:var(–p3);
-padding:5px 10px;border-bottom:1px solid var(–p2);flex-shrink:0;}
-#comms-log{flex:1;overflow-y:auto;padding:4px 10px;
+padding:3px 10px;border-bottom:1px solid var(–p2);flex-shrink:0;}
+#comms-log{flex:1;overflow-y:auto;padding:3px 8px;
 scrollbar-width:thin;scrollbar-color:var(–p3) var(–panel2);}
-.comm-line{font-size:10px;line-height:1.9;border-bottom:1px solid rgba(0,60,20,.2);
-display:flex;gap:8px;}
-.comm-time{color:rgba(0,170,50,.4);flex-shrink:0;font-size:9px;}
-.comm-who{flex-shrink:0;font-size:9px;}
+.comm-line{font-size:9px;line-height:1.7;border-bottom:1px solid rgba(0,60,20,.15);
+display:flex;gap:6px;}
+.comm-time{color:rgba(0,170,50,.4);flex-shrink:0;font-size:8px;}
+.comm-who{flex-shrink:0;font-size:8px;}
 .comm-who.dso{color:var(–red);}
 .comm-who.oso{color:var(–amber);}
 .comm-who.nav{color:var(–cyan);}
@@ -203,23 +203,23 @@ display:flex;gap:8px;}
 #event-panel{background:var(–panel);border-left:1px solid var(–p2);
 display:flex;flex-direction:column;overflow:hidden;}
 .event-header{font-size:7px;letter-spacing:3px;color:var(–p3);
-padding:5px 10px;border-bottom:1px solid var(–p2);flex-shrink:0;}
+padding:3px 8px;border-bottom:1px solid var(–p2);flex-shrink:0;}
 #event-display{flex:1;display:flex;flex-direction:column;align-items:center;
-justify-content:center;padding:10px;gap:8px;}
-.event-none{font-size:10px;color:var(–p2);letter-spacing:2px;text-align:center;}
-.event-title{font-family:var(–f-disp);font-size:clamp(11px,1.4vw,14px);
-letter-spacing:3px;text-align:center;}
-.event-title.alert{color:var(–red);text-shadow:0 0 12px var(–red);}
-.event-title.warn{color:var(–amber);text-shadow:0 0 12px var(–amber);}
+justify-content:center;padding:6px 8px;gap:5px;overflow-y:auto;}
+.event-none{font-size:9px;color:var(–p2);letter-spacing:2px;text-align:center;}
+.event-title{font-family:var(–f-disp);font-size:clamp(10px,1.2vw,12px);
+letter-spacing:2px;text-align:center;}
+.event-title.alert{color:var(–red);text-shadow:0 0 10px var(–red);}
+.event-title.warn{color:var(–amber);text-shadow:0 0 10px var(–amber);}
 .event-title.info{color:var(–cyan);}
-.event-body{font-size:10px;color:var(–p4);text-align:center;line-height:1.8;
-letter-spacing:1px;}
-.event-timer{font-family:var(–f-disp);font-size:22px;color:var(–red);
-text-shadow:0 0 16px var(–red);letter-spacing:4px;}
-.event-timer.amber{color:var(–amber);text-shadow:0 0 16px var(–amber);}
-.event-options{display:flex;flex-direction:column;gap:4px;width:100%;}
+.event-body{font-size:9px;color:var(–p4);text-align:center;line-height:1.6;
+letter-spacing:0px;}
+.event-timer{font-family:var(–f-disp);font-size:18px;color:var(–red);
+text-shadow:0 0 12px var(–red);letter-spacing:3px;}
+.event-timer.amber{color:var(–amber);text-shadow:0 0 12px var(–amber);}
+.event-options{display:flex;flex-direction:column;gap:3px;width:100%;}
 .ev-opt{background:var(–panel2);border:1px solid var(–p3);color:var(–p5);
-font-family:var(–f-mono);font-size:9px;letter-spacing:1px;padding:6px 10px;
+font-family:var(–f-mono);font-size:8px;letter-spacing:0px;padding:4px 8px;
 cursor:pointer;text-align:left;transition:all .1s;width:100%;}
 .ev-opt:hover{border-color:var(–p5);background:rgba(0,200,60,.08);color:var(–p6);}
 .ev-opt:active{transform:scale(.98);}
@@ -754,32 +754,78 @@ const SFX = (() => {
     src.connect(flt); flt.connect(ng); ng.connect(gn); src.start(t); src.stop(t+dur);
   }
 
-  // Start ambient engine drone
+  // Cabin ambience — layered filtered noise, no oscillators
+  // Layer 1: pressurization hiss  (white noise → highpass ~800Hz, very low gain)
+  // Layer 2: airframe/airflow     (white noise → lowpass ~120Hz, low gain)
+  // Layer 3: ventilation whisper  (white noise → bandpass ~2000Hz, narrow Q, very low)
+  // All layers summed: sounds like pressurized cabin air, not an engine drone
+  let cabinNodes = [];
+
   function startEngine() {
     init();
-    if (engineNode) return;
-    engineGain = ctx.createGain(); engineGain.gain.value = 0.06; engineGain.connect(master);
-    engineNode = ctx.createOscillator();
-    engineNode.type = 'sawtooth'; engineNode.frequency.value = 55;
-    const lp = ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=180;
-    engineNode.connect(lp); lp.connect(engineGain);
-    engineNode.start();
-    // Add harmonic shimmer
-    const o2 = ctx.createOscillator(), g2 = ctx.createGain();
-    o2.type='sawtooth'; o2.frequency.value=110; g2.gain.value=0.025;
-    o2.connect(g2); g2.connect(master); o2.start();
+    if (cabinNodes.length) return;
+
+    function makeNoiseSrc() {
+      // Long looping buffer of white noise
+      const secs = 4;
+      const buf = ctx.createBuffer(1, ctx.sampleRate * secs, ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const src = ctx.createBufferSource();
+      src.buffer = buf; src.loop = true;
+      return src;
+    }
+
+    engineGain = ctx.createGain(); engineGain.gain.value = 1.0; engineGain.connect(master);
+
+    // Layer 1 — pressurization hiss: highpass at 900Hz, very soft
+    const src1 = makeNoiseSrc();
+    const hp = ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=900; hp.Q.value=0.5;
+    const g1 = ctx.createGain(); g1.gain.value=0.018;
+    src1.connect(hp); hp.connect(g1); g1.connect(engineGain);
+    src1.start(); cabinNodes.push(src1);
+
+    // Layer 2 — low airframe rumble: lowpass at 90Hz, sub-bass presence
+    const src2 = makeNoiseSrc();
+    const lp = ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=90; lp.Q.value=0.8;
+    const g2 = ctx.createGain(); g2.gain.value=0.06;
+    src2.connect(lp); lp.connect(g2); g2.connect(engineGain);
+    src2.start(); cabinNodes.push(src2);
+
+    // Layer 3 — ventilation whisper: bandpass ~2200Hz, narrow
+    const src3 = makeNoiseSrc();
+    const bp = ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=2200; bp.Q.value=3.0;
+    const g3 = ctx.createGain(); g3.gain.value=0.008;
+    src3.connect(bp); bp.connect(g3); g3.connect(engineGain);
+    src3.start(); cabinNodes.push(src3);
+
+    // Layer 4 — mid-range flow noise: bandpass ~350Hz, broad
+    const src4 = makeNoiseSrc();
+    const bp2 = ctx.createBiquadFilter(); bp2.type='bandpass'; bp2.frequency.value=350; bp2.Q.value=1.0;
+    const g4 = ctx.createGain(); g4.gain.value=0.03;
+    src4.connect(bp2); bp2.connect(g4); g4.connect(engineGain);
+    src4.start(); cabinNodes.push(src4);
+
+    // Store filter refs for throttle modulation
+    engineGain._lp = lp; engineGain._g2 = g2; engineGain._g4 = g4;
   }
 
   function setEngineThrottle(thr) {
     if (!engineGain) return;
-    const vols = { ECO: 0.04, MIL: 0.07, AB: 0.12 };
-    const freqs = { ECO: 42, MIL: 55, AB: 75 };
-    engineGain.gain.setTargetAtTime(vols[thr], ctx.currentTime, 0.5);
-    if (engineNode) engineNode.frequency.setTargetAtTime(freqs[thr], ctx.currentTime, 0.5);
+    // Afterburner: slightly more low-end rumble and overall level
+    // ECO: quieter, less rumble
+    const vols  = { ECO: 0.7, MIL: 1.0, AB: 1.5 };
+    const rumble = { ECO: 0.04, MIL: 0.06, AB: 0.10 };
+    const flow   = { ECO: 0.02, MIL: 0.03, AB: 0.05 };
+    engineGain.gain.setTargetAtTime(vols[thr], ctx.currentTime, 1.2);
+    if (engineGain._g2) engineGain._g2.gain.setTargetAtTime(rumble[thr], ctx.currentTime, 1.0);
+    if (engineGain._g4) engineGain._g4.gain.setTargetAtTime(flow[thr], ctx.currentTime, 1.0);
   }
 
   function stopEngine() {
-    if (engineNode) { try { engineNode.stop(); } catch(e){} engineNode = null; }
+    cabinNodes.forEach(n => { try { n.stop(); } catch(e){} });
+    cabinNodes = [];
+    engineNode = null; engineGain = null;
   }
 
   // Sounds
