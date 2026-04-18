@@ -127,8 +127,9 @@ grid-template-rows:1fr 160px;}
 
 /* Map panel */
 #map-panel{position:relative;background:var(–p0);border-right:1px solid var(–p2);
-border-bottom:1px solid var(–p2);overflow:hidden;}
-#map-canvas{display:block;}
+border-bottom:1px solid var(–p2);overflow:hidden;
+display:flex;flex-direction:column;}
+#map-canvas{display:block;flex:1;width:100%;height:100%;}
 #map-label{position:absolute;top:6px;left:8px;font-size:8px;letter-spacing:3px;
 color:rgba(0,200,60,.4);}
 #map-reroute-btn{position:absolute;top:6px;right:8px;
@@ -949,11 +950,19 @@ let planWaypoints = [];
 function initPlanCanvas() {
   planCanvas = document.getElementById('plan-canvas');
   planCtx = planCanvas.getContext('2d');
-  const wrap = document.getElementById('plan-map-wrap');
-  planCanvas.width  = wrap.clientWidth;
-  planCanvas.height = wrap.clientHeight;
-  drawPlanMap();
 
+  function sizeCanvas() {
+    const wrap = document.getElementById('plan-map-wrap');
+    const rect = wrap.getBoundingClientRect();
+    if (rect.width < 10 || rect.height < 10) {
+      setTimeout(sizeCanvas, 50);
+      return;
+    }
+    planCanvas.width  = Math.floor(rect.width);
+    planCanvas.height = Math.floor(rect.height);
+    drawPlanMap();
+  }
+  sizeCanvas();
   planCanvas.addEventListener('click', onPlanClick);
 }
 
@@ -1152,10 +1161,20 @@ let rerouteWaypoints = [];
 function initGameMap() {
   mapCanvas = document.getElementById('map-canvas');
   mapCtx = mapCanvas.getContext('2d');
-  const panel = document.getElementById('map-panel');
-  mapCanvas.width  = panel.clientWidth;
-  mapCanvas.height = panel.clientHeight;
 
+  function sizeCanvas() {
+    const panel = document.getElementById('map-panel');
+    const rect = panel.getBoundingClientRect();
+    // On Safari iOS the panel may not have height yet — retry until it does
+    if (rect.width < 10 || rect.height < 10) {
+      setTimeout(sizeCanvas, 50);
+      return;
+    }
+    mapCanvas.width  = Math.floor(rect.width);
+    mapCanvas.height = Math.floor(rect.height);
+    drawGameMap();
+  }
+  sizeCanvas();
   mapCanvas.addEventListener('click', onMapClick);
 }
 
@@ -2129,8 +2148,6 @@ function startGame() {
     updateGauges(); updateTopBar();
     setThrottle('MIL');
     startGameLoop();
-    // Draw map after canvas init
-    setTimeout(drawGameMap, 200);
   }, 200);
 }
 
@@ -2155,15 +2172,18 @@ window.addEventListener('load', () => {
   });
 
   window.addEventListener('resize', () => {
-    if (document.getElementById('screen-plan').classList.contains('active')) {
+    if (document.getElementById('screen-plan').classList.contains('active') && planCanvas) {
       const wrap=document.getElementById('plan-map-wrap');
-      planCanvas.width=wrap.clientWidth; planCanvas.height=wrap.clientHeight;
+      const r=wrap.getBoundingClientRect();
+      planCanvas.width=Math.floor(r.width); planCanvas.height=Math.floor(r.height);
       drawPlanMap();
     }
     if (document.getElementById('screen-game').classList.contains('active') && mapCanvas) {
       const panel=document.getElementById('map-panel');
-      mapCanvas.width=panel.clientWidth; mapCanvas.height=panel.clientHeight;
+      const r=panel.getBoundingClientRect();
+      mapCanvas.width=Math.floor(r.width); mapCanvas.height=Math.floor(r.height);
       drawGameMap();
+    }
     }
   });
 });
