@@ -1,0 +1,2192 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<title>B-1B LANCER — STRATEGIC MISSION SIMULATOR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;600;700&display=swap">
+<style>
+:root {
+  --p0:#000d04;--p1:#001f0a;--p2:#003d14;--p3:#006622;--p4:#00aa38;--p5:#00dd4a;--p6:#00ff55;
+  --dim:#004418;--bright:#aaffcc;
+  --amber:#ffb200;--amber2:#ff8c00;--red:#ff2020;--red2:#cc0000;
+  --blue:#00aaff;--cyan:#00ffee;
+  --bezel:#141410;--bezel2:#1e1e18;--bezel3:#0a0a08;
+  --panel:#0a1208;--panel2:#060d04;
+  --f-mono:'Share Tech Mono','Courier New',Courier,monospace;
+  --f-disp:'Orbitron','Arial Narrow',Arial,sans-serif;
+  --scan: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{width:100%;height:100%;}
+body{width:100%;height:100vh;height:100dvh;min-height:-webkit-fill-available;
+  background:#080806;font-family:var(--f-mono);color:var(--p5);
+  overflow:hidden;user-select:none;display:flex;flex-direction:column;}
+
+/* ── SCREENS ── */
+.screen{position:fixed;inset:0;display:none;flex-direction:column;
+align-items:center;justify-content:center;background:#000d04;z-index:100;
+height:100vh;height:100dvh;}
+.screen.active{display:flex;}
+
+/* Game screen specifically needs full height flex column */
+#screen-game{position:fixed;inset:0;display:none;flex-direction:column;
+background:#080806;overflow:hidden;height:100vh;height:100dvh;}
+#screen-game.active{display:flex;}
+
+/* ── SCREENS ── */
+.screen{position:fixed;inset:0;display:none;flex-direction:column;
+align-items:center;justify-content:center;background:#000d04;z-index:100;}
+.screen.active{display:flex;}
+
+/* BOOT SCREEN */
+#screen-boot{gap:0;}
+.boot-line{font-size:clamp(9px,1.2vw,12px);color:var(–p4);letter-spacing:2px;
+padding:1px 0;opacity:0;animation:boot-in 0.1s forwards;}
+@keyframes boot-in{to{opacity:1}}
+.boot-cursor{display:inline-block;width:8px;height:1em;background:var(–p5);
+vertical-align:text-bottom;animation:blink .6s step-end infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* MISSION BRIEF */
+#screen-brief{gap:20px;padding:20px;overflow-y:auto;}
+.brief-header{font-family:var(–f-disp);font-size:clamp(16px,2.5vw,28px);
+letter-spacing:8px;color:var(–p6);text-shadow:0 0 20px var(–p6);text-align:center;}
+.brief-sub{font-size:10px;letter-spacing:4px;color:var(–p3);text-align:center;}
+.brief-panel{border:1px solid var(–p3);background:var(–p1);padding:14px 20px;
+max-width:700px;width:100%;position:relative;}
+.brief-panel::before{content:attr(data-label);position:absolute;top:-1px;left:10px;
+font-size:8px;letter-spacing:3px;color:var(–p4);background:var(–p1);
+padding:0 6px;transform:translateY(-50%);}
+.brief-row{display:flex;justify-content:space-between;padding:4px 0;
+border-bottom:1px solid rgba(0,100,30,0.15);font-size:11px;}
+.brief-row:last-child{border-bottom:none;}
+.brief-key{color:var(–dim);letter-spacing:1px;}
+.brief-val{color:var(–p6);font-family:var(–f-disp);font-size:10px;letter-spacing:2px;}
+.brief-val.amber{color:var(–amber);}
+.brief-val.red{color:var(–red);}
+.brief-orders{font-size:11px;color:var(–p4);line-height:2;letter-spacing:1px;}
+.brief-orders span{color:var(–p6);}
+#brief-proceed{font-family:var(–f-disp);font-size:13px;letter-spacing:6px;
+color:var(–p6);background:transparent;border:1px solid var(–p5);
+padding:12px 40px;cursor:pointer;transition:all .2s;
+animation:btn-pulse 2s ease-in-out infinite;}
+@keyframes btn-pulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 20px rgba(0,255,80,.3)}}
+#brief-proceed:hover{background:var(–p5);color:var(–p0);}
+
+/* PLANNING SCREEN */
+#screen-plan{flex-direction:row;align-items:stretch;padding:0;gap:0;}
+#plan-map-wrap{flex:1;position:relative;background:var(–p0);overflow:hidden;}
+#plan-canvas{display:block;cursor:crosshair;}
+#plan-sidebar{width:280px;background:var(–bezel2);border-left:1px solid var(–p2);
+display:flex;flex-direction:column;gap:0;overflow:hidden;}
+.plan-section{border-bottom:1px solid var(–p2);padding:10px 12px;}
+.plan-title{font-size:8px;letter-spacing:3px;color:var(–p3);margin-bottom:8px;}
+.plan-stat{display:flex;justify-content:space-between;font-size:10px;padding:2px 0;}
+.plan-stat-key{color:var(–dim);}
+.plan-stat-val{color:var(–p5);font-family:var(–f-disp);font-size:9px;letter-spacing:1px;}
+.plan-stat-val.warn{color:var(–amber);}
+.plan-stat-val.bad{color:var(–red);}
+.plan-nav-assess{font-size:10px;color:var(–p4);line-height:1.8;font-style:italic;
+border-top:1px solid var(–p2);padding-top:8px;margin-top:4px;}
+#plan-commit{width:100%;font-family:var(–f-disp);font-size:11px;letter-spacing:4px;
+color:var(–p6);background:transparent;border:1px solid var(–p4);
+padding:10px;cursor:pointer;transition:all .2s;margin-top:auto;}
+#plan-commit:hover{background:var(–p5);color:var(–p0);}
+#plan-commit:disabled{opacity:.3;cursor:not-allowed;}
+.plan-hint{font-size:9px;color:var(–p3);letter-spacing:1px;line-height:1.8;padding:8px 12px;}
+
+/* ── MAIN GAME SCREEN ── */
+#screen-game{flex-direction:column;padding:0;background:#080806;overflow:hidden;}
+
+/* Top bar */
+#top-bar{width:100%;background:var(–bezel);border-bottom:1px solid var(–p2);
+padding:3px 12px;padding-top:max(3px, env(safe-area-inset-top));
+display:flex;align-items:center;justify-content:space-between;
+flex-shrink:0;}
+.top-bar-item{display:flex;flex-direction:column;align-items:center;gap:1px;}
+.tbi-label{font-size:7px;letter-spacing:2px;color:var(–p3);}
+.tbi-val{font-family:var(–f-disp);font-size:clamp(10px,1.4vw,14px);
+color:var(–p6);letter-spacing:2px;text-shadow:0 0 8px var(–p5);}
+.tbi-val.amber{color:var(–amber);text-shadow:0 0 8px var(–amber);}
+.tbi-val.red{color:var(–red);text-shadow:0 0 8px var(–red);
+animation:crit .5s step-end infinite;}
+@keyframes crit{0%,100%{opacity:1}50%{opacity:.2}}
+.tbi-sep{width:1px;background:var(–p2);align-self:stretch;margin:0 8px;}
+
+/* Main display area */
+#display-area{flex:1;display:grid;overflow:hidden;min-height:0;
+grid-template-columns:1fr 260px;
+grid-template-rows:1fr 160px;}
+
+/* Map panel */
+#map-panel{position:relative;background:var(–p0);border-right:1px solid var(–p2);
+border-bottom:1px solid var(–p2);overflow:hidden;
+display:flex;flex-direction:column;}
+#map-canvas{display:block;flex:1;width:100%;height:100%;}
+#map-label{position:absolute;top:6px;left:8px;font-size:8px;letter-spacing:3px;
+color:rgba(0,200,60,.4);}
+#map-reroute-btn{position:absolute;top:6px;right:8px;
+font-family:var(–f-mono);font-size:8px;letter-spacing:2px;
+color:var(–amber);background:rgba(0,0,0,.7);border:1px solid var(–amber2);
+padding:3px 8px;cursor:pointer;display:none;}
+#map-reroute-btn:hover{background:rgba(255,140,0,.15);}
+#map-reroute-btn.active{display:block;}
+
+/* Instruments right panel */
+#instruments{background:var(–bezel2);border-bottom:1px solid var(–p2);
+display:flex;flex-direction:column;gap:0;overflow:hidden;}
+
+.inst-section{border-bottom:1px solid rgba(0,80,20,.4);padding:5px 8px;}
+.inst-section:last-child{border-bottom:none;flex:1;}
+.inst-label{font-size:7px;letter-spacing:2px;color:var(–p3);margin-bottom:4px;}
+
+/* Gauge bars */
+.gauge-row{display:flex;align-items:center;gap:4px;margin-bottom:3px;}
+.gauge-name{font-size:8px;color:var(–dim);width:52px;flex-shrink:0;letter-spacing:0px;}
+.gauge-track{flex:1;height:5px;background:rgba(0,30,10,.8);border:1px solid var(–p2);
+position:relative;overflow:hidden;}
+.gauge-fill{height:100%;background:var(–p5);box-shadow:0 0 4px var(–p5);
+transition:width .5s,background .5s;}
+.gauge-fill.warn{background:var(–amber);box-shadow:0 0 4px var(–amber);}
+.gauge-fill.crit{background:var(–red);box-shadow:0 0 4px var(–red);}
+.gauge-val{font-size:8px;color:var(–p4);width:32px;text-align:right;flex-shrink:0;}
+
+/* System status lights */
+.sys-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
+.sys-light{display:flex;align-items:center;gap:5px;font-size:9px;color:var(–p3);}
+.light{width:7px;height:7px;border-radius:50%;background:var(–p2);flex-shrink:0;
+box-shadow:inset 0 0 2px rgba(0,0,0,.5);}
+.light.on{background:var(–p5);box-shadow:0 0 6px var(–p5);}
+.light.warn{background:var(–amber);box-shadow:0 0 6px var(–amber);}
+.light.crit{background:var(–red);box-shadow:0 0 6px var(–red);
+animation:crit .6s step-end infinite;}
+.light.off{background:#222;box-shadow:none;}
+
+/* Heading control */
+.hdg-control{display:flex;align-items:center;gap:8px;margin-top:4px;}
+.hdg-label{font-size:8px;color:var(–dim);letter-spacing:1px;}
+.hdg-display{font-family:var(–f-disp);font-size:18px;color:var(–p6);
+letter-spacing:3px;text-shadow:0 0 10px var(–p5);min-width:60px;text-align:center;}
+.hdg-btn{background:var(–panel);border:1px solid var(–p3);color:var(–p5);
+font-family:var(–f-mono);font-size:12px;width:26px;height:26px;
+cursor:pointer;display:flex;align-items:center;justify-content:center;
+transition:all .1s;}
+.hdg-btn:hover{background:var(–p3);color:var(–p0);}
+.hdg-btn:active{transform:scale(.92);}
+.hdg-input{background:var(–panel);border:1px solid var(–p3);color:var(–p6);
+font-family:var(–f-disp);font-size:12px;width:52px;text-align:center;
+padding:2px 4px;letter-spacing:2px;}
+.hdg-input:focus{outline:none;border-color:var(–p5);box-shadow:0 0 6px var(–p4);}
+.throttle-row{display:flex;gap:4px;margin-top:6px;}
+.thr-btn{flex:1;background:var(–panel);border:1px solid var(–p2);color:var(–p3);
+font-family:var(–f-mono);font-size:8px;letter-spacing:1px;padding:4px 2px;
+cursor:pointer;text-align:center;transition:all .1s;}
+.thr-btn:hover{border-color:var(–p4);}
+.thr-btn.active{background:var(–p4);color:var(–p0);border-color:var(–p5);
+box-shadow:0 0 6px var(–p4);}
+.thr-btn.active.amber{background:var(–amber);border-color:var(–amber2);
+box-shadow:0 0 6px var(–amber);}
+.thr-btn.active.red{background:var(–red);border-color:var(–red2);
+box-shadow:0 0 6px var(–red);}
+
+/* Bottom: comms + event */
+#comms-panel{background:var(–panel2);border-right:1px solid var(–p2);
+overflow:hidden;display:flex;flex-direction:column;}
+.comms-header{font-size:7px;letter-spacing:3px;color:var(–p3);
+padding:3px 10px;border-bottom:1px solid var(–p2);flex-shrink:0;}
+#comms-log{flex:1;overflow-y:auto;padding:3px 8px;
+scrollbar-width:thin;scrollbar-color:var(–p3) var(–panel2);}
+.comm-line{font-size:9px;line-height:1.7;border-bottom:1px solid rgba(0,60,20,.15);
+display:flex;gap:6px;}
+.comm-time{color:rgba(0,170,50,.4);flex-shrink:0;font-size:8px;}
+.comm-who{flex-shrink:0;font-size:8px;}
+.comm-who.dso{color:var(–red);}
+.comm-who.oso{color:var(–amber);}
+.comm-who.nav{color:var(–cyan);}
+.comm-who.cmd{color:var(–p6);}
+.comm-who.sys{color:var(–p3);}
+.comm-txt{color:var(–p4);}
+.comm-line.alert .comm-txt{color:var(–red);}
+.comm-line.warn .comm-txt{color:var(–amber);}
+.comm-line.hot .comm-txt{color:var(–p6);}
+
+/* Event panel */
+#event-panel{background:var(–panel);border-left:1px solid var(–p2);
+display:flex;flex-direction:column;overflow:hidden;}
+.event-header{font-size:7px;letter-spacing:3px;color:var(–p3);
+padding:3px 8px;border-bottom:1px solid var(–p2);flex-shrink:0;}
+#event-display{flex:1;display:flex;flex-direction:column;align-items:center;
+justify-content:center;padding:6px 8px;gap:5px;overflow-y:auto;}
+.event-none{font-size:9px;color:var(–p2);letter-spacing:2px;text-align:center;}
+.event-title{font-family:var(–f-disp);font-size:clamp(10px,1.2vw,12px);
+letter-spacing:2px;text-align:center;}
+.event-title.alert{color:var(–red);text-shadow:0 0 10px var(–red);}
+.event-title.warn{color:var(–amber);text-shadow:0 0 10px var(–amber);}
+.event-title.info{color:var(–cyan);}
+.event-body{font-size:9px;color:var(–p4);text-align:center;line-height:1.6;
+letter-spacing:0px;}
+.event-timer{font-family:var(–f-disp);font-size:18px;color:var(–red);
+text-shadow:0 0 12px var(–red);letter-spacing:3px;}
+.event-timer.amber{color:var(–amber);text-shadow:0 0 12px var(–amber);}
+.event-options{display:flex;flex-direction:column;gap:3px;width:100%;}
+.ev-opt{background:var(–panel2);border:1px solid var(–p3);color:var(–p5);
+font-family:var(–f-mono);font-size:8px;letter-spacing:0px;padding:4px 8px;
+cursor:pointer;text-align:left;transition:all .1s;width:100%;}
+.ev-opt:hover{border-color:var(–p5);background:rgba(0,200,60,.08);color:var(–p6);}
+.ev-opt:active{transform:scale(.98);}
+.ev-opt.danger{border-color:var(–red2);color:var(–red);}
+.ev-opt.danger:hover{background:rgba(255,30,30,.08);}
+
+/* Debrief */
+#screen-debrief{gap:16px;padding:20px;overflow-y:auto;}
+.debrief-header{font-family:var(–f-disp);font-size:clamp(20px,3vw,36px);
+letter-spacing:6px;text-align:center;}
+.debrief-header.win{color:var(–p6);text-shadow:0 0 30px var(–p6);}
+.debrief-header.loss{color:var(–red);text-shadow:0 0 30px var(–red);}
+.debrief-sub{font-size:10px;letter-spacing:3px;color:var(–p3);text-align:center;}
+.debrief-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:700px;width:100%;}
+.debrief-box{border:1px solid var(–p2);background:var(–p1);padding:12px 16px;position:relative;}
+.debrief-box::before{content:attr(data-label);position:absolute;top:-1px;left:8px;
+font-size:8px;letter-spacing:3px;color:var(–p3);background:var(–p1);
+padding:0 4px;transform:translateY(-50%);}
+.db-row{display:flex;justify-content:space-between;font-size:10px;padding:3px 0;
+border-bottom:1px solid rgba(0,80,20,.2);}
+.db-row:last-child{border-bottom:none;}
+.db-key{color:var(–dim);}
+.db-val{color:var(–p5);font-family:var(–f-disp);font-size:9px;letter-spacing:1px;}
+.db-val.good{color:var(–p6);}
+.db-val.bad{color:var(–red);}
+.db-val.amber{color:var(–amber);}
+#debrief-restart{font-family:var(–f-disp);font-size:12px;letter-spacing:5px;
+color:var(–p6);background:transparent;border:1px solid var(–p5);
+padding:10px 30px;cursor:pointer;transition:all .2s;}
+#debrief-restart:hover{background:var(–p5);color:var(–p0);}
+
+/* CRT overlay */
+#crt-overlay{position:fixed;inset:0;pointer-events:none;z-index:9999;
+background:var(–scan);
+border-radius:0;}
+#crt-overlay::after{content:’’;position:fixed;inset:0;
+background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%);
+pointer-events:none;}
+
+/* Reroute mode overlay on map */
+#reroute-hint{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+font-size:9px;letter-spacing:2px;color:var(–amber);background:rgba(0,0,0,.8);
+border:1px solid var(–amber2);padding:3px 12px;display:none;pointer-events:none;}
+#reroute-hint.show{display:block;}
+</style>
+
+</head>
+<body>
+<div id="crt-overlay"></div>
+
+<!-- BOOT -->
+
+<div id="screen-boot" class="screen active">
+  <div id="boot-lines" style="max-width:600px;width:100%;padding:20px;"></div>
+</div>
+
+<!-- MISSION BRIEF -->
+
+<div id="screen-brief" class="screen">
+  <div class="brief-header">MISSION ASSIGNMENT</div>
+  <div class="brief-sub">STRATEGIC AIR COMMAND — EYES ONLY</div>
+  <div class="brief-panel" data-label="MISSION PARAMETERS">
+    <div class="brief-row"><span class="brief-key">AIRCRAFT</span><span class="brief-val">B-1B LANCER / CALLSIGN WARHAWK</span></div>
+    <div class="brief-row"><span class="brief-key">DEPARTURE</span><span class="brief-val" id="b-depart">—</span></div>
+    <div class="brief-row"><span class="brief-key">TARGET</span><span class="brief-val amber" id="b-target">CLASSIFIED</span></div>
+    <div class="brief-row"><span class="brief-key">TARGET COORDS</span><span class="brief-val" id="b-coords">—</span></div>
+    <div class="brief-row"><span class="brief-key">THREAT LEVEL</span><span class="brief-val red" id="b-threat">—</span></div>
+    <div class="brief-row"><span class="brief-key">ESTIMATED FLIGHT TIME</span><span class="brief-val" id="b-ftime">—</span></div>
+    <div class="brief-row"><span class="brief-key">PAYLOAD</span><span class="brief-val">1 × B61 THERMONUCLEAR DEVICE</span></div>
+    <div class="brief-row"><span class="brief-key">TANKER SUPPORT</span><span class="brief-val" id="b-tanker">—</span></div>
+  </div>
+  <div class="brief-panel" data-label="ORDERS">
+    <div class="brief-orders" id="brief-orders"></div>
+  </div>
+  <button id="brief-proceed" onclick="goPlanning()">PROCEED TO MISSION PLANNING ▶</button>
+</div>
+
+<!-- PLANNING -->
+
+<div id="screen-plan" class="screen">
+  <div id="plan-map-wrap">
+    <canvas id="plan-canvas"></canvas>
+    <div id="reroute-hint">REROUTE MODE — CLICK MAP TO ADD WAYPOINTS — PRESS DONE WHEN COMPLETE</div>
+  </div>
+  <div id="plan-sidebar">
+    <div class="plan-section">
+      <div class="plan-title">MISSION PLANNING</div>
+      <div style="font-size:9px;color:var(--p3);line-height:1.9;">
+        Click map to place waypoints.<br>
+        Click existing waypoint to remove.<br>
+        Route from <span style="color:var(--p6)" id="plan-dep-label">—</span> to target.
+      </div>
+    </div>
+    <div class="plan-section">
+      <div class="plan-title">ROUTE ANALYSIS</div>
+      <div class="plan-stat"><span class="plan-stat-key">EST. FLIGHT TIME</span><span class="plan-stat-val" id="ps-ftime">—</span></div>
+      <div class="plan-stat"><span class="plan-stat-key">FUEL MARGIN</span><span class="plan-stat-val" id="ps-fuel">—</span></div>
+      <div class="plan-stat"><span class="plan-stat-key">THREAT EXPOSURE</span><span class="plan-stat-val" id="ps-threat">—</span></div>
+      <div class="plan-stat"><span class="plan-stat-key">WAYPOINTS</span><span class="plan-stat-val" id="ps-wpts">0</span></div>
+      <div class="plan-nav-assess" id="ps-assess">Plot a route to begin analysis.</div>
+    </div>
+    <div class="plan-section" style="flex:1;overflow-y:auto;">
+      <div class="plan-title">THREAT INTELLIGENCE</div>
+      <div id="plan-threat-list" style="font-size:9px;color:var(--p3);line-height:2;"></div>
+    </div>
+    <div class="plan-hint">
+      ● SAM coverage shown as red zones<br>
+      ● Radar coverage shown as amber zones<br>
+      ● Fighter bases shown as ▷ markers<br>
+      ● Tanker track shown as ◆ cyan marker
+    </div>
+    <div style="padding:8px;">
+      <button id="plan-commit" onclick="commitPlan()" disabled>LOCK FLIGHT PLAN ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN GAME -->
+
+<div id="screen-game" class="screen">
+  <!-- Top bar -->
+  <div id="top-bar">
+    <div class="top-bar-item">
+      <div class="tbi-label">MISSION TIME</div>
+      <div class="tbi-val" id="tb-time">00:00:00</div>
+    </div>
+    <div class="tbi-sep"></div>
+    <div class="top-bar-item">
+      <div class="tbi-label">CALLSIGN</div>
+      <div class="tbi-val">WARHAWK</div>
+    </div>
+    <div class="tbi-sep"></div>
+    <div class="top-bar-item">
+      <div class="tbi-label">HEADING</div>
+      <div class="tbi-val" id="tb-hdg">000°</div>
+    </div>
+    <div class="tbi-sep"></div>
+    <div class="top-bar-item">
+      <div class="tbi-label">SPEED</div>
+      <div class="tbi-val" id="tb-spd">—</div>
+    </div>
+    <div class="tbi-sep"></div>
+    <div class="top-bar-item">
+      <div class="tbi-label">ALTITUDE</div>
+      <div class="tbi-val" id="tb-alt">—</div>
+    </div>
+    <div class="tbi-sep"></div>
+    <div class="top-bar-item">
+      <div class="tbi-label">DIST TO TARGET</div>
+      <div class="tbi-val" id="tb-dist">—</div>
+    </div>
+    <div class="tbi-sep"></div>
+    <div class="top-bar-item">
+      <div class="tbi-label">PHASE</div>
+      <div class="tbi-val amber" id="tb-phase">INGRESS</div>
+    </div>
+    <div class="tbi-sep"></div>
+    <div class="top-bar-item">
+      <div class="tbi-label">VOL</div>
+      <input type="range" id="vol-ctrl" min="0" max="100" value="60"
+        style="width:50px;accent-color:var(--p5);cursor:pointer;"
+        oninput="SFX.setVol(this.value/100)">
+    </div>
+  </div>
+
+  <div id="display-area">
+    <!-- Map -->
+    <div id="map-panel">
+      <canvas id="map-canvas"></canvas>
+      <div id="map-label">TACTICAL DISPLAY — INERTIAL NAV SYSTEM</div>
+      <button id="map-reroute-btn" onclick="toggleReroute()">✎ REROUTE</button>
+      <div id="reroute-hint"></div>
+    </div>
+
+```
+<!-- Instruments -->
+<div id="instruments">
+  <div class="inst-section">
+    <div class="inst-label">AIRCRAFT SYSTEMS</div>
+    <div class="gauge-row">
+      <div class="gauge-name">FUEL</div>
+      <div class="gauge-track"><div class="gauge-fill" id="g-fuel" style="width:100%"></div></div>
+      <div class="gauge-val" id="gv-fuel">100%</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-name">AIRFRAME</div>
+      <div class="gauge-track"><div class="gauge-fill" id="g-hull" style="width:100%"></div></div>
+      <div class="gauge-val" id="gv-hull">100%</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-name">L ENGINE</div>
+      <div class="gauge-track"><div class="gauge-fill" id="g-eng1" style="width:100%"></div></div>
+      <div class="gauge-val" id="gv-eng1">100%</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-name">R ENGINE</div>
+      <div class="gauge-track"><div class="gauge-fill" id="g-eng2" style="width:100%"></div></div>
+      <div class="gauge-val" id="gv-eng2">100%</div>
+    </div>
+  </div>
+
+  <div class="inst-section">
+    <div class="inst-label">DEFENSIVE SYSTEMS</div>
+    <div class="sys-grid">
+      <div class="sys-light"><div class="light on" id="sl-ecm"></div>ECM SUITE</div>
+      <div class="sys-light"><div class="light on" id="sl-rwr"></div>RWR ACTIVE</div>
+      <div class="sys-light"><div class="light off" id="sl-chaff"></div>CHAFF RDY</div>
+      <div class="sys-light"><div class="light off" id="sl-flare"></div>FLARE RDY</div>
+      <div class="sys-light"><div class="light on" id="sl-nav"></div>NAV SYSTEM</div>
+      <div class="sys-light"><div class="light off" id="sl-lock"></div>MISSILE LK</div>
+      <div class="sys-light"><div class="light off" id="sl-wpn"></div>WPN ARMED</div>
+      <div class="sys-light"><div class="light off" id="sl-fuel-lk"></div>FUEL LEAK</div>
+    </div>
+  </div>
+
+  <div class="inst-section">
+    <div class="inst-label">NAVIGATION CONTROL</div>
+    <div class="hdg-control">
+      <div class="hdg-label">HDG</div>
+      <button class="hdg-btn" onclick="adjustHdg(-10)">«</button>
+      <button class="hdg-btn" onclick="adjustHdg(-1)">‹</button>
+      <div class="hdg-display" id="hdg-display">090°</div>
+      <button class="hdg-btn" onclick="adjustHdg(1)">›</button>
+      <button class="hdg-btn" onclick="adjustHdg(10)">»</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:6px;">
+      <div class="hdg-label" style="font-size:8px;color:var(--dim);">SET</div>
+      <input class="hdg-input" id="hdg-input" type="number" min="0" max="359"
+        placeholder="090" onchange="setHdgDirect(this.value)">
+      <button class="hdg-btn" onclick="setHdgDirect(document.getElementById('hdg-input').value)"
+        style="width:auto;padding:0 8px;font-size:9px;">SET</button>
+    </div>
+    <div class="throttle-row">
+      <button class="thr-btn" id="thr-eco" onclick="setThrottle('ECO')">CRUISE</button>
+      <button class="thr-btn active" id="thr-mil" onclick="setThrottle('MIL')">MILITARY</button>
+      <button class="thr-btn red" id="thr-ab" onclick="setThrottle('AB')">A/B</button>
+    </div>
+  </div>
+
+  <div class="inst-section" style="flex:1;">
+    <div class="inst-label">WEAPONS</div>
+    <div class="gauge-row">
+      <div class="gauge-name">B61 STATUS</div>
+      <div class="gauge-track"><div class="gauge-fill" id="g-wpn" style="width:100%"></div></div>
+      <div class="gauge-val" id="gv-wpn">SAFE</div>
+    </div>
+    <div style="margin-top:6px;">
+      <button id="arm-btn" onclick="armWeapon()"
+        style="width:100%;font-family:var(--f-mono);font-size:9px;letter-spacing:2px;
+        color:var(--amber);background:var(--panel2);border:1px solid var(--amber2);
+        padding:5px;cursor:pointer;transition:all .2s;display:none;">
+        ARM WEAPON SYSTEM
+      </button>
+      <button id="release-btn" onclick="releaseWeapon()"
+        style="width:100%;font-family:var(--f-mono);font-size:9px;letter-spacing:2px;
+        color:var(--red);background:var(--panel2);border:1px solid var(--red2);
+        padding:5px;cursor:pointer;display:none;
+        animation:btn-pulse 1s ease-in-out infinite;">
+        ⦿ RELEASE WEAPON
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Comms log -->
+<div id="comms-panel">
+  <div class="comms-header">CREW COMMUNICATIONS — INTERPHONE</div>
+  <div id="comms-log"></div>
+</div>
+
+<!-- Event panel -->
+<div id="event-panel">
+  <div class="event-header">TACTICAL SITUATION</div>
+  <div id="event-display">
+    <div class="event-none">NOMINAL</div>
+  </div>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- DEBRIEF -->
+
+<div id="screen-debrief" class="screen">
+  <div class="debrief-header" id="db-title">MISSION DEBRIEF</div>
+  <div class="debrief-sub" id="db-sub">—</div>
+  <div class="debrief-grid">
+    <div class="debrief-box" data-label="MISSION OUTCOME">
+      <div class="db-row"><span class="db-key">RESULT</span><span class="db-val" id="db-result">—</span></div>
+      <div class="db-row"><span class="db-key">TARGET</span><span class="db-val" id="db-target">—</span></div>
+      <div class="db-row"><span class="db-key">HIT PROBABILITY</span><span class="db-val" id="db-hitpct">—</span></div>
+      <div class="db-row"><span class="db-key">MISSION TIME</span><span class="db-val" id="db-time">—</span></div>
+    </div>
+    <div class="debrief-box" data-label="AIRCRAFT STATUS">
+      <div class="db-row"><span class="db-key">AIRFRAME</span><span class="db-val" id="db-hull">—</span></div>
+      <div class="db-row"><span class="db-key">FUEL ON EXIT</span><span class="db-val" id="db-fuel">—</span></div>
+      <div class="db-row"><span class="db-key">ENGINE STATUS</span><span class="db-val" id="db-eng">—</span></div>
+      <div class="db-row"><span class="db-key">SYSTEMS LOST</span><span class="db-val" id="db-sys">—</span></div>
+    </div>
+    <div class="debrief-box" data-label="THREAT ENGAGEMENT">
+      <div class="db-row"><span class="db-key">SAM LAUNCHES</span><span class="db-val" id="db-sam">—</span></div>
+      <div class="db-row"><span class="db-key">INTERCEPTS</span><span class="db-val" id="db-int">—</span></div>
+      <div class="db-row"><span class="db-key">HITS TAKEN</span><span class="db-val" id="db-hits">—</span></div>
+      <div class="db-row"><span class="db-key">COUNTERMEASURES</span><span class="db-val" id="db-cm">—</span></div>
+    </div>
+    <div class="debrief-box" data-label="CREW ASSESSMENT">
+      <div class="db-val" id="db-assess" style="color:var(--p4);font-family:var(--f-mono);
+        font-size:10px;line-height:2;letter-spacing:0;"></div>
+    </div>
+  </div>
+  <button id="debrief-restart" onclick="bootSequence()">NEW MISSION</button>
+</div>
+
+<script>
+'use strict';
+// ════════════════════════════════════════════════════════════════
+//  B-1B LANCER — STRATEGIC MISSION SIMULATOR
+//  Real-time, uncompressed. Cold War geography. Permadeath.
+// ════════════════════════════════════════════════════════════════
+
+// ── GEOGRAPHY ──────────────────────────────────────────────────
+// Lat/lon → screen coords handled per-canvas via a projection box
+// All coords are [lat, lon]
+
+const GEO = {
+  // Departure airfields
+  airfields: [
+    { name: 'RAF FAIRFORD, UK',        pos: [51.68, -1.79],  side: 'west' },
+    { name: 'RAMSTEIN AB, GERMANY',    pos: [49.44,  7.60],  side: 'west' },
+    { name: 'LAKENHEATH AB, UK',       pos: [52.41,  0.56],  side: 'west' },
+  ],
+  // Target cities with threat levels
+  targets: [
+    { name: 'MINSK',       pos: [53.90, 27.57], threat: 'MODERATE', dist_km: 1800, time_min: 38 },
+    { name: 'KIEV',        pos: [50.45, 30.52], threat: 'MODERATE', dist_km: 2100, time_min: 44 },
+    { name: 'LENINGRAD',   pos: [59.95, 30.32], threat: 'HIGH',     dist_km: 2200, time_min: 46 },
+    { name: 'MOSCOW',      pos: [55.75, 37.62], threat: 'SEVERE',   dist_km: 2600, time_min: 54 },
+    { name: 'VILNIUS',     pos: [54.69, 25.28], threat: 'LOW',      dist_km: 1650, time_min: 35 },
+    { name: 'RIGA',        pos: [56.95, 24.11], threat: 'LOW',      dist_km: 1700, time_min: 36 },
+    { name: 'TALLINN',     pos: [59.44, 24.75], threat: 'MODERATE', dist_km: 1900, time_min: 40 },
+    { name: 'WARSAW',      pos: [52.23, 21.01], threat: 'MODERATE', dist_km: 1500, time_min: 32 },
+    { name: 'KALININGRAD', pos: [54.71, 20.51], threat: 'HIGH',     dist_km: 1400, time_min: 30 },
+    { name: 'MURMANSK',    pos: [68.97, 33.09], threat: 'HIGH',     dist_km: 2800, time_min: 58 },
+  ],
+  // Reference cities for map context
+  cities: [
+    { name: 'LONDON',    pos: [51.51, -0.13],  size: 'major' },
+    { name: 'PARIS',     pos: [48.86,  2.35],  size: 'major' },
+    { name: 'BERLIN',    pos: [52.52, 13.40],  size: 'major' },
+    { name: 'WARSAW',    pos: [52.23, 21.01],  size: 'major' },
+    { name: 'STOCKHOLM', pos: [59.33, 18.07],  size: 'major' },
+    { name: 'HELSINKI',  pos: [60.17, 24.94],  size: 'major' },
+    { name: 'VIENNA',    pos: [48.21, 16.37],  size: 'city'  },
+    { name: 'PRAGUE',    pos: [50.08, 14.44],  size: 'city'  },
+    { name: 'BUDAPEST',  pos: [47.50, 19.04],  size: 'city'  },
+    { name: 'BUCHAREST', pos: [44.43, 26.10],  size: 'city'  },
+    { name: 'KYIV',      pos: [50.45, 30.52],  size: 'major' },
+    { name: 'MINSK',     pos: [53.90, 27.57],  size: 'major' },
+    { name: 'MOSCOW',    pos: [55.75, 37.62],  size: 'major' },
+    { name: 'LENINGRAD', pos: [59.95, 30.32],  size: 'major' },
+    { name: 'COPENHAGEN',pos: [55.68, 12.57],  size: 'city'  },
+    { name: 'OSLO',      pos: [59.91, 10.75],  size: 'city'  },
+    { name: 'RIGA',      pos: [56.95, 24.11],  size: 'city'  },
+    { name: 'TALLINN',   pos: [59.44, 24.75],  size: 'city'  },
+    { name: 'VILNIUS',   pos: [54.69, 25.28],  size: 'city'  },
+  ],
+  // SAM / Radar / Fighter threat zones seeded along likely ingress routes
+  // [lat, lon, radius_km, type]
+  threats: [
+    [54.0, 19.5,  120, 'SAM',    'SA-5 GAMMON BELT'],
+    [53.5, 23.0,  100, 'SAM',    'SA-2/SA-3 COMPLEX'],
+    [55.0, 28.0,  130, 'SAM',    'SA-10 GRUMBLE SITE'],
+    [52.0, 24.0,   90, 'SAM',    'SA-6 BATTERY'],
+    [58.0, 28.0,  110, 'SAM',    'SA-5 BATTERY'],
+    [56.5, 33.0,  140, 'SAM',    'SA-10 COMPLEX'],
+    [54.0, 15.0,   80, 'RADAR',  'EW RADAR NETWORK'],
+    [56.0, 22.0,  100, 'RADAR',  'TALL KING RADAR'],
+    [59.0, 26.0,   90, 'RADAR',  'HEN HOUSE RADAR'],
+    [52.0, 30.0,  110, 'RADAR',  'DOG HOUSE RADAR'],
+    [54.5, 20.0,   60, 'FIGHTER','MIG-23 BASE'],
+    [55.5, 26.0,   80, 'FIGHTER','SU-15 INTERCEPTOR BASE'],
+    [57.0, 32.0,   80, 'FIGHTER','MIG-31 BASE'],
+    [60.0, 29.0,   70, 'FIGHTER','SU-27 BASE'],
+  ],
+  // Tanker tracks
+  tankers: [
+    { name: 'SHELL 11',  pos: [54.0, 11.0], region: 'BALTIC TRACK' },
+    { name: 'SHELL 22',  pos: [52.5, 17.0], region: 'CENTRAL TRACK' },
+  ],
+};
+
+// Map projection bounds
+const MAP_BOUNDS = { minLat: 44, maxLat: 70, minLon: -4, maxLon: 42 };
+
+function project(lat, lon, W, H) {
+  const x = (lon - MAP_BOUNDS.minLon) / (MAP_BOUNDS.maxLon - MAP_BOUNDS.minLon) * W;
+  const y = (1 - (lat - MAP_BOUNDS.minLat) / (MAP_BOUNDS.maxLat - MAP_BOUNDS.minLat)) * H;
+  return [x, y];
+}
+
+function unproject(x, y, W, H) {
+  const lon = (x / W) * (MAP_BOUNDS.maxLon - MAP_BOUNDS.minLon) + MAP_BOUNDS.minLon;
+  const lat = (1 - y / H) * (MAP_BOUNDS.maxLat - MAP_BOUNDS.minLat) + MAP_BOUNDS.minLat;
+  return [lat, lon];
+}
+
+function latLonDist(a, b) {
+  // Haversine approximation in km
+  const R = 6371;
+  const dLat = (b[0]-a[0]) * Math.PI/180;
+  const dLon = (b[1]-a[1]) * Math.PI/180;
+  const s = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(a[0]*Math.PI/180)*Math.cos(b[0]*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+  return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1-s));
+}
+
+function latLonBearing(a, b) {
+  const dLon = (b[1]-a[1]) * Math.PI/180;
+  const lat1 = a[0] * Math.PI/180, lat2 = b[0] * Math.PI/180;
+  const y = Math.sin(dLon) * Math.cos(lat2);
+  const x = Math.cos(lat1)*Math.sin(lat2) - Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLon);
+  return ((Math.atan2(y, x) * 180/Math.PI) + 360) % 360;
+}
+
+// ── GAME STATE ──────────────────────────────────────────────────
+let M = null; // Mission state
+
+function newMission() {
+  const airfield = GEO.airfields[Math.floor(Math.random() * GEO.airfields.length)];
+  const target   = GEO.targets[Math.floor(Math.random() * GEO.targets.length)];
+
+  M = {
+    // Identity
+    airfield, target,
+    // Aircraft position (lat/lon, updated in real-time)
+    pos: [...airfield.pos],
+    heading: 90,   // degrees
+    targetHeading: 90,
+    throttle: 'MIL',
+    altitude: 200,  // ft AGL (nap of earth default)
+    // Speed in km/h based on throttle
+    speed: 900,
+    // Fuel: 0-100%
+    fuel: 100,
+    fuelRate: 0.4,  // %/min at MIL
+    fuelLeak: false,
+    // Systems integrity 0-100
+    airframe: 100,
+    engine1: 100,
+    engine2: 100,
+    ecm: 100,
+    nav: 100,
+    // Countermeasures
+    chaff: 12,
+    flares: 8,
+    // Weapon
+    weaponArmed: false,
+    weaponReleased: false,
+    weaponHitPct: 0,
+    // Route
+    waypoints: [],  // [{lat,lon}]
+    currentWaypointIdx: 0,
+    routeDeviation: false,
+    // Mission phase
+    phase: 'INGRESS',  // INGRESS, IP_APPROACH, BOMB_RUN, EGRESS, COMPLETE
+    // Clock
+    missionSec: 0,
+    // Stats
+    samLaunches: 0,
+    intercepts: 0,
+    hitsReceived: 0,
+    cmUsed: 0,
+    systemsLost: [],
+    // Event system
+    activeEvent: null,
+    eventQueue: [],
+    eventCooldown: 0,
+    nextEventIn: 60 + Math.random() * 120,  // seconds
+    // Threat tracking
+    inThreatZone: [],
+    fighterEngaged: false,
+    // Reroute mode
+    rerouteMode: false,
+    // Tanker
+    tankerVisited: false,
+    tankerAvailable: true,
+    // IP (initial point) — 80km from target
+    ipReached: false,
+    // Debrief
+    lossReason: '',
+    won: false,
+  };
+
+  // Compute initial heading toward target
+  M.heading = Math.round(latLonBearing(M.pos, M.target.pos));
+  M.targetHeading = M.heading;
+}
+
+// ── SOUND ENGINE ────────────────────────────────────────────────
+const SFX = (() => {
+  let ctx = null, master = null;
+  let engineNode = null, engineGain = null;
+  let alarmNode = null, alarmActive = false;
+  let lockNode = null, lockActive = false;
+
+  function init() {
+    if (ctx) return;
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    master = ctx.createGain(); master.gain.value = 0.6;
+    master.connect(ctx.destination);
+  }
+  function resume() { init(); if (ctx.state==='suspended') ctx.resume(); }
+  function setVol(v) { init(); master.gain.setTargetAtTime(v*0.7, ctx.currentTime, 0.05); }
+
+  function g(v=1) { const n=ctx.createGain(); n.gain.value=v; n.connect(master); return n; }
+
+  function osc(type, freq, t, dur, peak, gn) {
+    const o=ctx.createOscillator(), og=ctx.createGain();
+    o.type=type; o.frequency.value=freq;
+    og.gain.setValueAtTime(0,t);
+    og.gain.linearRampToValueAtTime(peak,t+0.01);
+    og.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(og); og.connect(gn); o.start(t); o.stop(t+dur+0.02);
+  }
+
+  function noise(t, dur, fc, Q, peak, gn) {
+    const buf=ctx.createBuffer(1,ctx.sampleRate*dur,ctx.sampleRate);
+    const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+    const src=ctx.createBufferSource(), flt=ctx.createBiquadFilter(), ng=ctx.createGain();
+    src.buffer=buf; flt.type='bandpass'; flt.frequency.value=fc; flt.Q.value=Q;
+    ng.gain.setValueAtTime(peak,t); ng.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    src.connect(flt); flt.connect(ng); ng.connect(gn); src.start(t); src.stop(t+dur);
+  }
+
+  // Cabin ambience — layered filtered noise, no oscillators
+  // Layer 1: pressurization hiss  (white noise → highpass ~800Hz, very low gain)
+  // Layer 2: airframe/airflow     (white noise → lowpass ~120Hz, low gain)
+  // Layer 3: ventilation whisper  (white noise → bandpass ~2000Hz, narrow Q, very low)
+  // All layers summed: sounds like pressurized cabin air, not an engine drone
+  let cabinNodes = [];
+
+  function startEngine() {
+    init();
+    if (cabinNodes.length) return;
+
+    function makeNoiseSrc() {
+      // Long looping buffer of white noise
+      const secs = 4;
+      const buf = ctx.createBuffer(1, ctx.sampleRate * secs, ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const src = ctx.createBufferSource();
+      src.buffer = buf; src.loop = true;
+      return src;
+    }
+
+    engineGain = ctx.createGain(); engineGain.gain.value = 1.0; engineGain.connect(master);
+
+    // Layer 1 — pressurization hiss: highpass at 900Hz, very soft
+    const src1 = makeNoiseSrc();
+    const hp = ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=900; hp.Q.value=0.5;
+    const g1 = ctx.createGain(); g1.gain.value=0.018;
+    src1.connect(hp); hp.connect(g1); g1.connect(engineGain);
+    src1.start(); cabinNodes.push(src1);
+
+    // Layer 2 — low airframe rumble: lowpass at 90Hz, sub-bass presence
+    const src2 = makeNoiseSrc();
+    const lp = ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=90; lp.Q.value=0.8;
+    const g2 = ctx.createGain(); g2.gain.value=0.06;
+    src2.connect(lp); lp.connect(g2); g2.connect(engineGain);
+    src2.start(); cabinNodes.push(src2);
+
+    // Layer 3 — ventilation whisper: bandpass ~2200Hz, narrow
+    const src3 = makeNoiseSrc();
+    const bp = ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=2200; bp.Q.value=3.0;
+    const g3 = ctx.createGain(); g3.gain.value=0.008;
+    src3.connect(bp); bp.connect(g3); g3.connect(engineGain);
+    src3.start(); cabinNodes.push(src3);
+
+    // Layer 4 — mid-range flow noise: bandpass ~350Hz, broad
+    const src4 = makeNoiseSrc();
+    const bp2 = ctx.createBiquadFilter(); bp2.type='bandpass'; bp2.frequency.value=350; bp2.Q.value=1.0;
+    const g4 = ctx.createGain(); g4.gain.value=0.03;
+    src4.connect(bp2); bp2.connect(g4); g4.connect(engineGain);
+    src4.start(); cabinNodes.push(src4);
+
+    // Store filter refs for throttle modulation
+    engineGain._lp = lp; engineGain._g2 = g2; engineGain._g4 = g4;
+  }
+
+  function setEngineThrottle(thr) {
+    if (!engineGain) return;
+    // Afterburner: slightly more low-end rumble and overall level
+    // ECO: quieter, less rumble
+    const vols  = { ECO: 0.7, MIL: 1.0, AB: 1.5 };
+    const rumble = { ECO: 0.04, MIL: 0.06, AB: 0.10 };
+    const flow   = { ECO: 0.02, MIL: 0.03, AB: 0.05 };
+    engineGain.gain.setTargetAtTime(vols[thr], ctx.currentTime, 1.2);
+    if (engineGain._g2) engineGain._g2.gain.setTargetAtTime(rumble[thr], ctx.currentTime, 1.0);
+    if (engineGain._g4) engineGain._g4.gain.setTargetAtTime(flow[thr], ctx.currentTime, 1.0);
+  }
+
+  function stopEngine() {
+    cabinNodes.forEach(n => { try { n.stop(); } catch(e){} });
+    cabinNodes = [];
+    engineNode = null; engineGain = null;
+  }
+
+  // Sounds
+  function beep(freq=880, dur=0.08) { init(); const n=g(0.3); osc('sine',freq,ctx.currentTime,dur,1,n); }
+  function click() { init(); const n=g(0.2); noise(ctx.currentTime,0.015,3000,0.4,0.8,n); }
+
+  function navBeep() {
+    init(); const t=ctx.currentTime, n=g(0.25);
+    osc('sine',440,t,0.06,0.8,n); osc('sine',660,t+0.08,0.06,0.8,n);
+  }
+
+  function warning() {
+    init(); const t=ctx.currentTime, n=g(0.5);
+    osc('square',880,t,0.1,0.7,n); osc('square',660,t+0.14,0.1,0.6,n);
+  }
+
+  function samAlert() {
+    init(); const t=ctx.currentTime, n=g(0.6);
+    const o=ctx.createOscillator(), og=ctx.createGain();
+    o.type='sawtooth'; o.frequency.setValueAtTime(300,t); o.frequency.exponentialRampToValueAtTime(2000,t+0.3);
+    og.gain.setValueAtTime(0.7,t); og.gain.exponentialRampToValueAtTime(0.001,t+0.35);
+    o.connect(og); og.connect(n); o.start(t); o.stop(t+0.38);
+    noise(t,0.3,5000,1.5,0.4,n);
+  }
+
+  function impact() {
+    init(); const t=ctx.currentTime, n=g(0.8);
+    noise(t,0.05,600,0.3,1,n); noise(t,0.1,180,0.4,0.9,n);
+    const o=ctx.createOscillator(), og=ctx.createGain(), lp=ctx.createBiquadFilter();
+    o.type='sawtooth'; o.frequency.setValueAtTime(80,t); o.frequency.exponentialRampToValueAtTime(20,t+0.8);
+    og.gain.setValueAtTime(0.7,t); og.gain.exponentialRampToValueAtTime(0.001,t+0.9);
+    lp.type='lowpass'; lp.frequency.value=150;
+    o.connect(lp); lp.connect(og); og.connect(n); o.start(t); o.stop(t+1);
+  }
+
+  function weaponDrop() {
+    init(); const t=ctx.currentTime, n=g(0.6);
+    [0,0.15,0.30].forEach((dt,i)=>osc('square',440+i*220,t+dt,0.1,0.5,n));
+    noise(t+0.45,0.06,400,0.4,0.8,n);
+    const o=ctx.createOscillator(), og=ctx.createGain();
+    o.type='sine'; o.frequency.setValueAtTime(800,t+0.5); o.frequency.exponentialRampToValueAtTime(100,t+1.5);
+    og.gain.setValueAtTime(0.5,t+0.5); og.gain.exponentialRampToValueAtTime(0.001,t+1.6);
+    o.connect(og); og.connect(n); o.start(t+0.5); o.stop(t+1.65);
+  }
+
+  function detonation() {
+    init(); const t=ctx.currentTime+1.2, n=g(0.9);
+    noise(t,0.06,1000,0.2,1,n); noise(t+0.05,1.2,300,0.2,0.85,n); noise(t+0.07,1.5,100,0.3,0.7,n);
+    const o=ctx.createOscillator(), og=ctx.createGain(), lp=ctx.createBiquadFilter();
+    o.type='sawtooth'; o.frequency.setValueAtTime(50,t); o.frequency.exponentialRampToValueAtTime(300,t+0.5);
+    o.frequency.exponentialRampToValueAtTime(30,t+2);
+    og.gain.setValueAtTime(0.8,t); og.gain.exponentialRampToValueAtTime(0.001,t+2.2);
+    lp.type='lowpass'; lp.frequency.value=500;
+    o.connect(lp); lp.connect(og); og.connect(n); o.start(t); o.stop(t+2.3);
+  }
+
+  function refuel() {
+    init(); const t=ctx.currentTime, n=g(0.4);
+    [261,329,392,523].forEach((f,i)=>osc('sine',f,t+i*0.1,0.3,0.5,n));
+  }
+
+  function missionSuccess() {
+    init(); const t=ctx.currentTime, n=g(0.6);
+    [262,330,392,523,659,784].forEach((f,i)=>{ osc('sine',f,t+i*0.12,0.25,0.6,n); osc('square',f,t+i*0.12,0.2,0.1,n); });
+    [523,659,784].forEach(f=>osc('sine',f,t+0.85,1.0,0.4,n));
+  }
+
+  function missionLoss() {
+    init(); const t=ctx.currentTime, n=g(0.6);
+    [440,370,311,262,220].forEach((f,i)=>{ osc('square',f,t+i*0.25,0.3,0.5,n); osc('sine',f*0.5,t+i*0.25,0.32,0.3,n); });
+    osc('sawtooth',50,t+1.4,1.5,0.35,n);
+  }
+
+  function startMissileLock() {
+    if (lockActive) return; init(); lockActive=true;
+    function pulse() {
+      if (!lockActive) return; const t=ctx.currentTime, n=g(0.45);
+      osc('square',1320,t,0.05,0.8,n); osc('square',1100,t+0.07,0.05,0.7,n);
+      setTimeout(pulse, 400);
+    } pulse();
+  }
+  function stopMissileLock() { lockActive=false; }
+
+  function startAlarm() {
+    if (alarmActive) return; init(); alarmActive=true;
+    function pulse() {
+      if (!alarmActive) return; const t=ctx.currentTime, n=g(0.35);
+      osc('square',880,t,0.08,0.6,n); osc('square',660,t+0.1,0.07,0.5,n);
+      setTimeout(pulse, 700);
+    } pulse();
+  }
+  function stopAlarm() { alarmActive=false; }
+
+  return { resume, setVol, startEngine, stopEngine, setEngineThrottle,
+    beep, click, navBeep, warning, samAlert, impact, weaponDrop,
+    detonation, refuel, missionSuccess, missionLoss,
+    startMissileLock, stopMissileLock, startAlarm, stopAlarm };
+})();
+
+// ── PLANNING MAP ────────────────────────────────────────────────
+let planCanvas, planCtx;
+let planWaypoints = [];
+
+function initPlanCanvas() {
+  planCanvas = document.getElementById('plan-canvas');
+  planCtx = planCanvas.getContext('2d');
+
+  function sizeCanvas() {
+    const wrap = document.getElementById('plan-map-wrap');
+    const rect = wrap.getBoundingClientRect();
+    if (rect.width < 10 || rect.height < 10) {
+      setTimeout(sizeCanvas, 50);
+      return;
+    }
+    planCanvas.width  = Math.floor(rect.width);
+    planCanvas.height = Math.floor(rect.height);
+    drawPlanMap();
+  }
+  sizeCanvas();
+  planCanvas.addEventListener('click', onPlanClick);
+}
+
+function onPlanClick(e) {
+  const rect = planCanvas.getBoundingClientRect();
+  const x = e.clientX - rect.left, y = e.clientY - rect.top;
+  const W = planCanvas.width, H = planCanvas.height;
+  const [lat, lon] = unproject(x, y, W, H);
+
+  // Check if clicking near existing waypoint to remove
+  for (let i = 0; i < planWaypoints.length; i++) {
+    const [wx, wy] = project(planWaypoints[i][0], planWaypoints[i][1], W, H);
+    if (Math.hypot(x-wx, y-wy) < 12) {
+      planWaypoints.splice(i, 1);
+      SFX.click();
+      updatePlanAnalysis();
+      drawPlanMap();
+      return;
+    }
+  }
+
+  // Don't allow waypoints too close to start or past target
+  planWaypoints.push([lat, lon]);
+  SFX.click();
+  updatePlanAnalysis();
+  drawPlanMap();
+}
+
+function drawPlanMap() {
+  if (!planCtx) return;
+  const W = planCanvas.width, H = planCanvas.height;
+  const ctx = planCtx;
+
+  ctx.fillStyle = '#000d04';
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(0,80,20,0.12)'; ctx.lineWidth = 0.5;
+  for (let lat = 45; lat <= 70; lat += 5) {
+    const [,y] = project(lat, MAP_BOUNDS.minLon, W, H);
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+    ctx.fillStyle='rgba(0,120,30,0.3)'; ctx.font='8px Share Tech Mono';
+    ctx.textAlign='left'; ctx.fillText(lat+'°N', 2, y-2);
+  }
+  for (let lon = 0; lon <= 40; lon += 10) {
+    const [x] = project(MAP_BOUNDS.minLat, lon, W, H);
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+    ctx.fillStyle='rgba(0,120,30,0.3)'; ctx.font='8px Share Tech Mono';
+    ctx.textAlign='center'; ctx.fillText(lon+'°E', x, H-2);
+  }
+
+  // Threat zones
+  for (const [tlat, tlon, trad, ttype, tname] of GEO.threats) {
+    const [tx, ty] = project(tlat, tlon, W, H);
+    const pxPerKm = W / ((MAP_BOUNDS.maxLon - MAP_BOUNDS.minLon) * 111.32 * Math.cos(tlat*Math.PI/180));
+    const r = trad * pxPerKm;
+    ctx.beginPath(); ctx.arc(tx, ty, r, 0, Math.PI*2);
+    if (ttype==='SAM')    { ctx.fillStyle='rgba(180,20,20,0.12)'; ctx.strokeStyle='rgba(200,40,40,0.3)'; }
+    else if (ttype==='RADAR')   { ctx.fillStyle='rgba(180,120,0,0.10)'; ctx.strokeStyle='rgba(200,150,0,0.25)'; }
+    else { ctx.fillStyle='rgba(180,80,0,0.08)'; ctx.strokeStyle='rgba(200,100,0,0.2)'; }
+    ctx.fill(); ctx.lineWidth=0.5; ctx.stroke();
+  }
+
+  // Reference cities
+  for (const city of GEO.cities) {
+    const [cx, cy] = project(city.pos[0], city.pos[1], W, H);
+    if (cx < 0 || cx > W || cy < 0 || cy > H) continue;
+    ctx.fillStyle = city.size==='major' ? 'rgba(0,180,60,0.5)' : 'rgba(0,120,40,0.35)';
+    ctx.beginPath(); ctx.arc(cx, cy, city.size==='major'?3:2, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = city.size==='major' ? 'rgba(0,200,60,0.5)' : 'rgba(0,150,50,0.35)';
+    ctx.font = city.size==='major' ? '9px Share Tech Mono' : '8px Share Tech Mono';
+    ctx.textAlign = 'left'; ctx.fillText(city.name, cx+5, cy+3);
+  }
+
+  // Tankers
+  for (const tk of GEO.tankers) {
+    const [tx, ty] = project(tk.pos[0], tk.pos[1], W, H);
+    ctx.fillStyle = '#00ffee'; ctx.font = '12px Share Tech Mono';
+    ctx.textAlign='center'; ctx.fillText('◆', tx, ty+4);
+    ctx.fillStyle='rgba(0,220,220,0.6)'; ctx.font='8px Share Tech Mono';
+    ctx.fillText(tk.name, tx, ty+14);
+  }
+
+  // Fighter bases
+  for (const [tlat, tlon,,ttype] of GEO.threats) {
+    if (ttype !== 'FIGHTER') continue;
+    const [fx, fy] = project(tlat, tlon, W, H);
+    ctx.fillStyle='rgba(255,120,0,0.8)'; ctx.font='11px Share Tech Mono';
+    ctx.textAlign='center'; ctx.fillText('▷', fx, fy+4);
+  }
+
+  // Planned route
+  if (M) {
+    const allPoints = [[...M.airfield.pos], ...planWaypoints, [...M.target.pos]];
+    if (allPoints.length > 1) {
+      ctx.setLineDash([4,4]); ctx.strokeStyle='rgba(0,255,80,0.5)'; ctx.lineWidth=1.5;
+      ctx.beginPath();
+      allPoints.forEach((pt, i) => {
+        const [px, py] = project(pt[0], pt[1], W, H);
+        i===0 ? ctx.moveTo(px,py) : ctx.lineTo(px,py);
+      });
+      ctx.stroke(); ctx.setLineDash([]);
+    }
+
+    // Waypoints
+    planWaypoints.forEach((wp, i) => {
+      const [wx, wy] = project(wp[0], wp[1], W, H);
+      ctx.fillStyle='rgba(0,255,80,0.8)'; ctx.strokeStyle='rgba(0,255,80,0.4)';
+      ctx.beginPath(); ctx.arc(wx, wy, 6, 0, Math.PI*2); ctx.fill(); ctx.lineWidth=1; ctx.stroke();
+      ctx.fillStyle='rgba(0,255,80,0.9)'; ctx.font='8px Share Tech Mono';
+      ctx.textAlign='center'; ctx.fillText(`WP${i+1}`, wx, wy-10);
+    });
+
+    // Airfield
+    const [ax, ay] = project(M.airfield.pos[0], M.airfield.pos[1], W, H);
+    ctx.fillStyle='#00ff55'; ctx.font='14px Share Tech Mono';
+    ctx.textAlign='center'; ctx.fillText('✈', ax, ay+5);
+    ctx.fillStyle='rgba(0,255,80,0.7)'; ctx.font='9px Share Tech Mono';
+    ctx.fillText(M.airfield.name.split(',')[0], ax, ay+18);
+
+    // Target
+    const [tx2, ty2] = project(M.target.pos[0], M.target.pos[1], W, H);
+    ctx.strokeStyle='rgba(255,30,30,0.8)'; ctx.lineWidth=1.5;
+    const ts = 10;
+    ctx.beginPath(); ctx.moveTo(tx2-ts,ty2); ctx.lineTo(tx2+ts,ty2);
+    ctx.moveTo(tx2,ty2-ts); ctx.lineTo(tx2,ty2+ts); ctx.stroke();
+    ctx.beginPath(); ctx.arc(tx2,ty2,6,0,Math.PI*2); ctx.stroke();
+    ctx.fillStyle='rgba(255,60,60,0.8)'; ctx.font='9px Share Tech Mono';
+    ctx.textAlign='left'; ctx.fillText('TARGET', tx2+12, ty2+3);
+  }
+}
+
+function updatePlanAnalysis() {
+  if (!M) return;
+  const allPoints = [[...M.airfield.pos], ...planWaypoints, [...M.target.pos]];
+  let totalDist = 0;
+  for (let i = 0; i < allPoints.length-1; i++) totalDist += latLonDist(allPoints[i], allPoints[i+1]);
+
+  const speedKmh = 900;
+  const timeMin = Math.round(totalDist / speedKmh * 60);
+  const fuelUsed = timeMin * 0.4; // % per min at MIL
+  const fuelMargin = 100 - fuelUsed;
+
+  // Threat exposure: count how many threat zones route passes through
+  let exposure = 0;
+  for (let i = 0; i < allPoints.length-1; i++) {
+    const steps = 20;
+    for (let s = 0; s <= steps; s++) {
+      const t = s/steps;
+      const lat = allPoints[i][0] + (allPoints[i+1][0]-allPoints[i][0])*t;
+      const lon = allPoints[i][1] + (allPoints[i+1][1]-allPoints[i][1])*t;
+      for (const [tlat,tlon,trad] of GEO.threats) {
+        if (latLonDist([lat,lon],[tlat,tlon]) < trad) { exposure++; break; }
+      }
+    }
+  }
+  const exposurePct = Math.min(100, Math.round(exposure/((allPoints.length-1)*20)*100));
+
+  document.getElementById('ps-ftime').textContent = timeMin + ' MIN';
+  document.getElementById('ps-wpts').textContent = planWaypoints.length;
+
+  const fuelEl = document.getElementById('ps-fuel');
+  fuelEl.textContent = fuelMargin > 0 ? '+'+Math.round(fuelMargin)+'%' : Math.round(fuelMargin)+'%';
+  fuelEl.className = 'plan-stat-val' + (fuelMargin < 5 ? ' bad' : fuelMargin < 20 ? ' warn' : '');
+
+  const thrEl = document.getElementById('ps-threat');
+  thrEl.textContent = exposurePct + '%';
+  thrEl.className = 'plan-stat-val' + (exposurePct > 60 ? ' bad' : exposurePct > 30 ? ' warn' : '');
+
+  // Navigator assessment
+  let assess = '';
+  if (planWaypoints.length === 0) assess = 'Direct route. Maximum threat exposure. No routing margin.';
+  else if (fuelMargin < 5) assess = 'Fuel state critical on this route. Recommend tanker rendezvous or shorter path.';
+  else if (exposurePct > 60) assess = 'Heavy threat exposure throughout route. Recommend additional deviation.';
+  else if (exposurePct > 30) assess = 'Moderate threat zones on route. Some exposure unavoidable.';
+  else assess = 'Route clears primary threat belts. Fuel margin acceptable.';
+  document.getElementById('ps-assess').textContent = 'NAV: ' + assess;
+  document.getElementById('plan-commit').disabled = false;
+}
+
+function commitPlan() {
+  if (!M) return;
+  M.waypoints = [...planWaypoints, [...M.target.pos]];
+  M.currentWaypointIdx = 0;
+  // Set initial heading toward first waypoint
+  M.heading = Math.round(latLonBearing(M.pos, M.waypoints[0]));
+  M.targetHeading = M.heading;
+  SFX.navBeep();
+  startGame();
+}
+
+// ── GAME MAP ────────────────────────────────────────────────────
+let mapCanvas, mapCtx;
+let rerouteWaypoints = [];
+
+function initGameMap() {
+  mapCanvas = document.getElementById('map-canvas');
+  mapCtx = mapCanvas.getContext('2d');
+
+  function sizeCanvas() {
+    const panel = document.getElementById('map-panel');
+    const rect = panel.getBoundingClientRect();
+    // On Safari iOS the panel may not have height yet — retry until it does
+    if (rect.width < 10 || rect.height < 10) {
+      setTimeout(sizeCanvas, 50);
+      return;
+    }
+    mapCanvas.width  = Math.floor(rect.width);
+    mapCanvas.height = Math.floor(rect.height);
+    drawGameMap();
+  }
+  sizeCanvas();
+  mapCanvas.addEventListener('click', onMapClick);
+}
+
+function onMapClick(e) {
+  if (!M || !M.rerouteMode) return;
+  const rect = mapCanvas.getBoundingClientRect();
+  const x = e.clientX - rect.left, y = e.clientY - rect.top;
+  const W = mapCanvas.width, H = mapCanvas.height;
+  const [lat, lon] = unproject(x, y, W, H);
+  rerouteWaypoints.push([lat, lon]);
+  SFX.click();
+  drawGameMap();
+}
+
+function toggleReroute() {
+  if (!M || M.phase === 'COMPLETE') return;
+  M.rerouteMode = !M.rerouteMode;
+  const btn = document.getElementById('map-reroute-btn');
+  const hint = document.getElementById('reroute-hint');
+  if (M.rerouteMode) {
+    rerouteWaypoints = [];
+    btn.textContent = '✓ DONE';
+    hint.classList.add('show');
+    hint.textContent = 'REROUTE MODE — CLICK TO ADD WAYPOINTS — CLICK DONE WHEN COMPLETE';
+  } else {
+    // Commit reroute
+    if (rerouteWaypoints.length > 0) {
+      M.waypoints = [...rerouteWaypoints, [...M.target.pos]];
+      M.currentWaypointIdx = 0;
+      crewSpeak('nav', 'New routing acknowledged. Updating flight plan.');
+      SFX.navBeep();
+    }
+    btn.textContent = '✎ REROUTE';
+    hint.classList.remove('show');
+  }
+}
+
+function drawGameMap() {
+  if (!mapCtx || !M) return;
+  const W = mapCanvas.width, H = mapCanvas.height;
+  const ctx = mapCtx;
+
+  ctx.fillStyle = '#000d04'; ctx.fillRect(0,0,W,H);
+
+  // Grid
+  ctx.strokeStyle='rgba(0,60,15,0.15)'; ctx.lineWidth=0.5;
+  for (let lat=45; lat<=70; lat+=5) {
+    const [,y]=project(lat,MAP_BOUNDS.minLon,W,H);
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+  }
+  for (let lon=0; lon<=40; lon+=10) {
+    const [x]=project(MAP_BOUNDS.minLat,lon,W,H);
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+  }
+
+  // Threat zones (dimmer during flight)
+  for (const [tlat,tlon,trad,ttype] of GEO.threats) {
+    const [tx,ty]=project(tlat,tlon,W,H);
+    const pxPerKm=W/((MAP_BOUNDS.maxLon-MAP_BOUNDS.minLon)*111.32*Math.cos(tlat*Math.PI/180));
+    const r=trad*pxPerKm;
+    ctx.beginPath(); ctx.arc(tx,ty,r,0,Math.PI*2);
+    if (ttype==='SAM') { ctx.fillStyle='rgba(150,15,15,0.08)'; ctx.strokeStyle='rgba(180,30,30,0.2)'; }
+    else if (ttype==='RADAR') { ctx.fillStyle='rgba(150,100,0,0.07)'; ctx.strokeStyle='rgba(180,130,0,0.18)'; }
+    else { ctx.fillStyle='rgba(0,0,0,0)'; ctx.strokeStyle='rgba(180,80,0,0.15)'; }
+    ctx.fill(); ctx.lineWidth=0.5; ctx.stroke();
+  }
+
+  // Tankers
+  for (const tk of GEO.tankers) {
+    if (M.tankerVisited) continue;
+    const [tx,ty]=project(tk.pos[0],tk.pos[1],W,H);
+    ctx.fillStyle='#00ffee'; ctx.font='10px Share Tech Mono'; ctx.textAlign='center';
+    ctx.fillText('◆',tx,ty+4);
+    ctx.fillStyle='rgba(0,200,200,0.5)'; ctx.font='7px Share Tech Mono';
+    ctx.fillText(tk.name,tx,ty+13);
+  }
+
+  // Planned remaining route
+  if (M.currentWaypointIdx < M.waypoints.length) {
+    const rem = [[...M.pos], ...M.waypoints.slice(M.currentWaypointIdx)];
+    ctx.setLineDash([3,4]); ctx.strokeStyle='rgba(0,200,60,0.35)'; ctx.lineWidth=1;
+    ctx.beginPath();
+    rem.forEach((pt,i) => {
+      const [px,py]=project(pt[0],pt[1],W,H);
+      i===0 ? ctx.moveTo(px,py) : ctx.lineTo(px,py);
+    });
+    ctx.stroke(); ctx.setLineDash([]);
+  }
+
+  // Reroute preview
+  if (M.rerouteMode && rerouteWaypoints.length > 0) {
+    const rr = [[...M.pos], ...rerouteWaypoints, [...M.target.pos]];
+    ctx.setLineDash([2,3]); ctx.strokeStyle='rgba(255,170,0,0.5)'; ctx.lineWidth=1;
+    ctx.beginPath();
+    rr.forEach((pt,i) => {
+      const [px,py]=project(pt[0],pt[1],W,H);
+      i===0 ? ctx.moveTo(px,py) : ctx.lineTo(px,py);
+    });
+    ctx.stroke(); ctx.setLineDash([]);
+    rerouteWaypoints.forEach(wp => {
+      const [wx,wy]=project(wp[0],wp[1],W,H);
+      ctx.fillStyle='rgba(255,180,0,0.7)'; ctx.beginPath(); ctx.arc(wx,wy,5,0,Math.PI*2); ctx.fill();
+    });
+  }
+
+  // Track history (trail)
+  if (M.trackHistory && M.trackHistory.length > 1) {
+    ctx.strokeStyle='rgba(0,100,30,0.25)'; ctx.lineWidth=1; ctx.setLineDash([]);
+    ctx.beginPath();
+    M.trackHistory.forEach((pt,i) => {
+      const [px,py]=project(pt[0],pt[1],W,H);
+      i===0 ? ctx.moveTo(px,py) : ctx.lineTo(px,py);
+    });
+    ctx.stroke();
+  }
+
+  // Reference cities
+  for (const city of GEO.cities) {
+    const [cx,cy]=project(city.pos[0],city.pos[1],W,H);
+    if (cx<0||cx>W||cy<0||cy>H) continue;
+    ctx.fillStyle=city.size==='major'?'rgba(0,150,50,0.45)':'rgba(0,100,35,0.3)';
+    ctx.beginPath(); ctx.arc(cx,cy,city.size==='major'?2.5:1.5,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle=city.size==='major'?'rgba(0,170,50,0.45)':'rgba(0,120,40,0.3)';
+    ctx.font=city.size==='major'?'8px Share Tech Mono':'7px Share Tech Mono';
+    ctx.textAlign='left'; ctx.fillText(city.name,cx+4,cy+3);
+  }
+
+  // Target
+  const [ttx,tty]=project(M.target.pos[0],M.target.pos[1],W,H);
+  const pulse = M.phase==='BOMB_RUN' ? 1 + 0.3*Math.sin(Date.now()/300) : 1;
+  ctx.strokeStyle=`rgba(255,30,30,${0.7*pulse})`; ctx.lineWidth=1.5;
+  const ts=8*pulse;
+  ctx.beginPath(); ctx.moveTo(ttx-ts,tty); ctx.lineTo(ttx+ts,tty);
+  ctx.moveTo(ttx,tty-ts); ctx.lineTo(ttx,tty+ts); ctx.stroke();
+  ctx.beginPath(); ctx.arc(ttx,tty,5*pulse,0,Math.PI*2); ctx.stroke();
+  if (M.phase==='COMPLETE' || M.weaponReleased) {
+    ctx.fillStyle='rgba(255,100,0,0.3)'; ctx.beginPath(); ctx.arc(ttx,tty,20,0,Math.PI*2); ctx.fill();
+  }
+  if (M.target.revealed || M.phase==='BOMB_RUN' || M.phase==='EGRESS') {
+    ctx.fillStyle='rgba(255,60,60,0.7)'; ctx.font='8px Share Tech Mono';
+    ctx.textAlign='left'; ctx.fillText(M.target.name, ttx+10, tty+3);
+  } else {
+    ctx.fillStyle='rgba(255,60,60,0.5)'; ctx.font='8px Share Tech Mono';
+    ctx.textAlign='left'; ctx.fillText('CLASSIFIED', ttx+10, tty+3);
+  }
+
+  // IP marker
+  if (!M.ipReached && M.phase === 'INGRESS') {
+    const bearing = latLonBearing(M.target.pos, M.pos);
+    const ipLat = M.target.pos[0] + Math.cos(bearing*Math.PI/180)*0.72;
+    const ipLon = M.target.pos[1] + Math.sin(bearing*Math.PI/180)*0.72;
+    const [ix,iy]=project(ipLat,ipLon,W,H);
+    ctx.strokeStyle='rgba(255,180,0,0.4)'; ctx.lineWidth=1; ctx.setLineDash([2,3]);
+    ctx.beginPath(); ctx.arc(ix,iy,5,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='rgba(255,180,0,0.4)'; ctx.font='7px Share Tech Mono';
+    ctx.textAlign='left'; ctx.fillText('IP',ix+7,iy+3);
+  }
+
+  // Player aircraft
+  const [px,py]=project(M.pos[0],M.pos[1],W,H);
+  // Heading indicator
+  const hdgRad=(M.heading-90)*Math.PI/180;
+  ctx.strokeStyle='rgba(0,255,80,0.4)'; ctx.lineWidth=1; ctx.setLineDash([2,3]);
+  ctx.beginPath(); ctx.moveTo(px,py);
+  ctx.lineTo(px+Math.cos(hdgRad)*40, py+Math.sin(hdgRad)*40); ctx.stroke(); ctx.setLineDash([]);
+  // Halo
+  const hg=ctx.createRadialGradient(px,py,0,px,py,16);
+  hg.addColorStop(0,'rgba(0,255,80,0.2)'); hg.addColorStop(1,'transparent');
+  ctx.fillStyle=hg; ctx.beginPath(); ctx.arc(px,py,16,0,Math.PI*2); ctx.fill();
+  // Symbol
+  ctx.fillStyle='#aaffcc'; ctx.font='bold 14px Share Tech Mono';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.shadowColor='#00ff55'; ctx.shadowBlur=10;
+  ctx.fillText('✈',px,py); ctx.shadowBlur=0; ctx.textBaseline='alphabetic';
+
+  // Scale bar
+  ctx.strokeStyle='rgba(0,150,40,0.4)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(10,H-15); ctx.lineTo(110,H-15); ctx.stroke();
+  const km = Math.round((MAP_BOUNDS.maxLon-MAP_BOUNDS.minLon)*111.32*100/W);
+  ctx.fillStyle='rgba(0,150,40,0.5)'; ctx.font='7px Share Tech Mono';
+  ctx.textAlign='center'; ctx.fillText(`~${km}KM`,60,H-5);
+}
+
+// ── COMMS / LOG ─────────────────────────────────────────────────
+let commLines = [];
+
+function crewSpeak(who, msg, type='') {
+  const names = { dso:'DSO', oso:'OSO', nav:'NAV', cmd:'CMD', sys:'SYS' };
+  const t = formatTime(M ? M.missionSec : 0);
+  commLines.unshift({ who, name: names[who]||who.toUpperCase(), msg, type, t });
+  if (commLines.length > 80) commLines.pop();
+  renderComms();
+}
+
+function renderComms() {
+  const log = document.getElementById('comms-log');
+  log.innerHTML = commLines.slice(0,30).map(l =>
+    `<div class="comm-line ${l.type}">
+      <span class="comm-time">${l.t}</span>
+      <span class="comm-who ${l.who}">${l.name}</span>
+      <span class="comm-txt">${l.msg}</span>
+    </div>`
+  ).join('');
+}
+
+function formatTime(sec) {
+  const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = Math.floor(sec%60);
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+// ── EVENT SYSTEM ────────────────────────────────────────────────
+let eventTimer = null;
+
+function clearEvent() {
+  if (eventTimer) { clearTimeout(eventTimer); eventTimer=null; }
+  M.activeEvent = null;
+  SFX.stopMissileLock(); SFX.stopAlarm();
+  renderEvent();
+}
+
+function renderEvent() {
+  const disp = document.getElementById('event-display');
+  if (!M || !M.activeEvent) {
+    disp.innerHTML = '<div class="event-none">NOMINAL</div>';
+    // Show reroute button during ingress
+    document.getElementById('map-reroute-btn').className =
+      (M && M.phase==='INGRESS') ? 'active' : '';
+    return;
+  }
+  const ev = M.activeEvent;
+  let html = `<div class="event-title ${ev.severity}">${ev.title}</div>`;
+  if (ev.body) html += `<div class="event-body">${ev.body}</div>`;
+  if (ev.countdown > 0) {
+    const cls = ev.countdown < 6 ? 'event-timer' : 'event-timer amber';
+    html += `<div class="${cls}" id="ev-cd">${Math.ceil(ev.countdown)}s</div>`;
+  }
+  if (ev.options && ev.options.length) {
+    html += '<div class="event-options">';
+    ev.options.forEach((opt, i) => {
+      html += `<button class="ev-opt ${opt.danger?'danger':''}" onclick="chooseOption(${i})">${opt.label}</button>`;
+    });
+    html += '</div>';
+  }
+  disp.innerHTML = html;
+}
+
+function chooseOption(idx) {
+  if (!M || !M.activeEvent) return;
+  SFX.click();
+  const ev = M.activeEvent;
+  const opt = ev.options[idx];
+  if (opt && opt.action) opt.action();
+  clearEvent();
+  M.eventCooldown = 30 + Math.random() * 60;
+}
+
+function triggerEvent(ev) {
+  if (M.activeEvent) {
+    M.eventQueue.push(ev);
+    return;
+  }
+  M.activeEvent = { countdown: 0, ...ev };
+  if (ev.onStart) ev.onStart();
+  if (ev.countdown > 0) {
+    scheduleCountdown();
+  }
+  renderEvent();
+}
+
+function scheduleCountdown() {
+  if (!M || !M.activeEvent || M.activeEvent.countdown <= 0) return;
+  eventTimer = setTimeout(() => {
+    if (!M || !M.activeEvent) return;
+    M.activeEvent.countdown--;
+    renderEvent();
+    if (M.activeEvent.countdown <= 0) {
+      // Time expired — apply default consequence
+      if (M.activeEvent.onExpire) M.activeEvent.onExpire();
+      clearEvent();
+    } else {
+      scheduleCountdown();
+    }
+  }, 1000);
+}
+
+// ── EVENT GENERATORS ────────────────────────────────────────────
+
+function buildEventSamLaunch() {
+  M.samLaunches++;
+  SFX.samAlert();
+  return {
+    title: 'SAM LAUNCH DETECTED',
+    severity: 'alert',
+    body: 'MISSILE INBOUND — DSO tracking 1-2 objects.\nAltitude: terrain-level ingress.',
+    countdown: 14,
+    onStart: () => { SFX.startMissileLock(); setLight('sl-lock','crit'); },
+    onExpire: () => {
+      // Missile hits — take damage
+      const dmg = 15 + Math.floor(Math.random()*20);
+      takeDamage(dmg, 'SAM IMPACT');
+      setLight('sl-lock','off');
+      SFX.stopMissileLock();
+    },
+    options: [
+      { label: 'DEPLOY CHAFF', action: () => {
+        if (M.chaff > 0) {
+          M.chaff--; M.cmUsed++;
+          const hit = Math.random() < 0.25;
+          if (hit) { const d=8+Math.floor(Math.random()*12); takeDamage(d,'CHAFF PARTIAL — GLANCING HIT'); }
+          else crewSpeak('dso','Chaff effective. Missile defeated.','hot');
+          setLight('sl-lock','off'); SFX.stopMissileLock();
+        } else {
+          crewSpeak('dso','No chaff remaining.','warn');
+          const d=15+Math.floor(Math.random()*20); takeDamage(d,'SAM IMPACT');
+          setLight('sl-lock','off'); SFX.stopMissileLock();
+        }
+      }},
+      { label: 'HARD TURN + DESCEND', action: () => {
+        const hit = Math.random() < 0.35;
+        if (hit) { const d=10+Math.floor(Math.random()*15); takeDamage(d,'SAM IMPACT — EVASION PARTIAL'); }
+        else crewSpeak('dso','Missile lost track. Evasion effective.','hot');
+        setLight('sl-lock','off'); SFX.stopMissileLock();
+      }},
+      { label: 'ACTIVE ECM JAM', action: () => {
+        if (M.ecm > 30) {
+          const hit = Math.random() < (1 - M.ecm/200);
+          if (hit) { const d=12+Math.floor(Math.random()*15); takeDamage(d,'SAM IMPACT — ECM PARTIAL'); }
+          else crewSpeak('oso','ECM effective. Missile lost guidance.','hot');
+          M.ecm = Math.max(0, M.ecm - 8);
+          setLight('sl-lock','off'); SFX.stopMissileLock();
+        } else {
+          crewSpeak('oso','ECM suite degraded. Insufficient output.','warn');
+          const d=15+Math.floor(Math.random()*20); takeDamage(d,'SAM IMPACT');
+          setLight('sl-lock','off'); SFX.stopMissileLock();
+        }
+      }},
+    ]
+  };
+}
+
+function buildEventFighterIntercept() {
+  M.intercepts++;
+  SFX.startAlarm();
+  return {
+    title: 'FIGHTER INTERCEPT',
+    severity: 'alert',
+    body: 'DSO: Bandit — single contact, closing from starboard.\nIFF negative. MIG-31 probable.',
+    countdown: 20,
+    onStart: () => setLight('sl-lock','warn'),
+    onExpire: () => {
+      const d=20+Math.floor(Math.random()*25); takeDamage(d,'CANNON FIRE');
+      setLight('sl-lock','off'); SFX.stopAlarm();
+    },
+    options: [
+      { label: 'FULL AFTERBURNER — EXTEND', action: () => {
+        const esc = M.engine1 > 50 && M.engine2 > 50;
+        if (esc && Math.random() < 0.6) crewSpeak('dso','Bandit lost visual. Extending.','hot');
+        else { const d=10+Math.floor(Math.random()*15); takeDamage(d,'CANNON FIRE — PARTIAL HIT'); }
+        setLight('sl-lock','off'); SFX.stopAlarm(); setThrottle('AB');
+      }},
+      { label: 'DEPLOY FLARES + BREAK', action: () => {
+        if (M.flares > 0) {
+          M.flares--; M.cmUsed++;
+          const hit = Math.random() < 0.2;
+          if (hit) { const d=8+Math.floor(Math.random()*12); takeDamage(d,'HEAT SEEKER — PARTIAL'); }
+          else crewSpeak('dso','Flares effective. Bandit disengaging.','hot');
+        } else {
+          crewSpeak('dso','No flares. Taking fire.','warn');
+          const d=18+Math.floor(Math.random()*22); takeDamage(d,'CANNON FIRE');
+        }
+        setLight('sl-lock','off'); SFX.stopAlarm();
+      }},
+      { label: 'ECM + TERRAIN MASKING', action: () => {
+        if (M.ecm > 20 && M.nav > 40) {
+          crewSpeak('oso','ECM jamming active. Nav routing terrain mask.','hot');
+          M.ecm = Math.max(0, M.ecm - 12);
+          if (Math.random() < 0.35) { const d=8+Math.floor(Math.random()*10); takeDamage(d,'MISSILE — PARTIAL TRACK'); }
+          else crewSpeak('dso','Bandit lost lock. Terrain masking effective.','hot');
+        } else {
+          const d=15+Math.floor(Math.random()*20); takeDamage(d,'CANNON FIRE');
+        }
+        setLight('sl-lock','off'); SFX.stopAlarm();
+      }},
+    ]
+  };
+}
+
+function buildEventRadarContact() {
+  return {
+    title: 'RADAR ACQUISITION',
+    severity: 'warn',
+    body: 'DSO: We\'re being painted. EW radar, continuous wave.\nCurrent track quality: good.',
+    countdown: 0,
+    options: [
+      { label: 'ECM — ACTIVE JAM', action: () => {
+        if (M.ecm > 20) {
+          crewSpeak('oso','Active jamming. Degrading their track picture.','');
+          M.ecm = Math.max(0, M.ecm - 5);
+        } else crewSpeak('oso','ECM too degraded to jam effectively.','warn');
+      }},
+      { label: 'DESCEND — NOE ROUTING', action: () => {
+        crewSpeak('nav','Descending to terrain-following altitude.','');
+        M.altitude = 100; updateTopBar();
+      }},
+      { label: 'CONTINUE — ACCEPT TRACK', action: () => {
+        crewSpeak('dso','Acknowledged. Track quality may improve their SAM posture.','warn');
+      }},
+    ]
+  };
+}
+
+function buildEventFuelWarning() {
+  return {
+    title: 'FUEL STATE LOW',
+    severity: 'warn',
+    body: `NAV: Fuel at ${Math.floor(M.fuel)}%. Recommend tanker rendezvous\nor route shortening.`,
+    countdown: 0,
+    options: [
+      { label: 'DIVERT TO TANKER TRACK', action: () => {
+        // Reroute via nearest tanker
+        const tk = GEO.tankers[0];
+        M.waypoints = [[tk.pos[0],tk.pos[1]], ...M.waypoints];
+        M.currentWaypointIdx = 0;
+        crewSpeak('nav','Diverting to SHELL 11. ETA 12 minutes.','');
+        SFX.navBeep();
+      }},
+      { label: 'CONTINUE — ACCEPT RISK', action: () => {
+        crewSpeak('nav','Acknowledged. Fuel state will be critical on egress.','warn');
+      }},
+    ]
+  };
+}
+
+function buildEventDamageSystem(sys) {
+  const names = { ecm:'ECM SUITE', nav:'NAV SYSTEM', engine1:'LEFT ENGINE', engine2:'RIGHT ENGINE' };
+  return {
+    title: `${names[sys]||sys} DAMAGE`,
+    severity: 'alert',
+    body: `${names[sys]||sys} integrity below 40%.\nPerformance degraded.`,
+    countdown: 0,
+    options: [
+      { label: 'ACKNOWLEDGE', action: () => crewSpeak('sys', `${names[sys]} damage acknowledged.`, 'warn') },
+    ]
+  };
+}
+
+function buildEventTankerRendezvous() {
+  return {
+    title: 'TANKER CONTACT',
+    severity: 'info',
+    body: 'SHELL 11 on frequency. Cleared for refueling.\nEstimated 8 minutes on the boom.',
+    countdown: 0,
+    options: [
+      { label: 'COMMENCE REFUELING', action: () => {
+        const added = Math.min(100-M.fuel, 60);
+        M.fuel = Math.min(100, M.fuel + added);
+        M.tankerVisited = true;
+        crewSpeak('nav',`Refueling complete. Fuel state: ${Math.floor(M.fuel)}%.`,'hot');
+        SFX.refuel(); updateGauges();
+      }},
+      { label: 'DECLINE — CONTINUE MISSION', action: () => {
+        crewSpeak('nav','Tanker declined. Continuing on current fuel state.','warn');
+      }},
+    ]
+  };
+}
+
+function buildEventIPApproach() {
+  M.target.revealed = true;
+  return {
+    title: 'INITIAL POINT',
+    severity: 'warn',
+    body: `Target acquisition: ${M.target.name}.\n80km. Final attack heading.\nOSO arming sequence initiated.`,
+    countdown: 0,
+    onStart: () => {
+      document.getElementById('arm-btn').style.display='block';
+      setLight('sl-wpn','warn');
+      crewSpeak('oso',`Target: ${M.target.name}. Arming sequence on your order.`,'warn');
+      crewSpeak('nav','Eighty kilometers to release point. Maintain current heading.','');
+    },
+    options: [
+      { label: 'ACKNOWLEDGE — BEGIN ATTACK RUN', action: () => {
+        M.phase = 'BOMB_RUN';
+        document.getElementById('tb-phase').textContent='BOMB RUN';
+        crewSpeak('oso','Attack run initiated. Maintain heading and altitude.','hot');
+        crewSpeak('dso','Threat posture elevated. SAM activity increasing.','warn');
+        SFX.warning();
+      }},
+      { label: 'ABORT — DIVERT TO ALTERNATE', action: () => {
+        // Pick alternate target
+        const alts = GEO.targets.filter(t=>t.name!==M.target.name && t.threat!=='SEVERE');
+        if (alts.length) {
+          const alt = alts[Math.floor(Math.random()*alts.length)];
+          M.target = { ...alt, revealed: true };
+          M.waypoints = [[...alt.pos]];
+          M.currentWaypointIdx = 0;
+          crewSpeak('cmd',`Abort acknowledged. Diverting to alternate target: ${alt.name}.`,'warn');
+          SFX.navBeep();
+        } else {
+          crewSpeak('cmd','No viable alternate. Continuing attack on primary.','warn');
+          M.phase='BOMB_RUN';
+        }
+      }},
+    ]
+  };
+}
+
+function buildEventBombRelease() {
+  return {
+    title: 'RELEASE POINT',
+    severity: 'alert',
+    body: 'On target. Release authorized.\nOSO ready. Weapon safe.',
+    countdown: 0,
+    options: [
+      { label: '⦿ RELEASE WEAPON', action: () => {
+        document.getElementById('release-btn').style.display='block';
+        document.getElementById('arm-btn').style.display='none';
+      }, danger: true },
+    ]
+  };
+}
+
+// ── DAMAGE ──────────────────────────────────────────────────────
+function takeDamage(amount, reason) {
+  if (!M || M.phase==='COMPLETE') return;
+  M.hitsReceived++;
+  M.airframe = Math.max(0, M.airframe - amount);
+  SFX.impact();
+  crewSpeak('dso', `${reason}. Airframe: ${Math.floor(M.airframe)}%.`, 'alert');
+
+  // Secondary damage
+  if (Math.random() < 0.3) {
+    const sys = ['engine1','engine2','ecm','nav'][Math.floor(Math.random()*4)];
+    const sysDmg = 10 + Math.floor(Math.random()*20);
+    M[sys] = Math.max(0, M[sys] - sysDmg);
+    if (M[sys] < 40 && !M.systemsLost.includes(sys)) {
+      M.systemsLost.push(sys);
+      triggerEvent(buildEventDamageSystem(sys));
+    }
+  }
+
+  updateGauges();
+  if (M.airframe <= 0) loseGame('AIRCRAFT DESTROYED — ' + reason);
+  if (M.engine1 <= 0 && M.engine2 <= 0) loseGame('DUAL ENGINE FAILURE');
+}
+
+// ── WEAPON ──────────────────────────────────────────────────────
+function armWeapon() {
+  if (!M || M.weaponArmed) return;
+  M.weaponArmed = true;
+  SFX.warning();
+  document.getElementById('arm-btn').style.display='none';
+  document.getElementById('release-btn').style.display='block';
+  setLight('sl-wpn','crit');
+  crewSpeak('oso','Weapon armed. Release authorized.','alert');
+}
+
+function releaseWeapon() {
+  if (!M || !M.weaponArmed || M.weaponReleased) return;
+  M.weaponReleased = true;
+  SFX.weaponDrop();
+  document.getElementById('release-btn').style.display='none';
+  setLight('sl-wpn','off');
+
+  // Hit probability based on conditions
+  let hitPct = 75;
+  if (M.airframe < 50) hitPct -= 15;
+  if (M.nav < 50) hitPct -= 10;
+  if (M.altitude < 200) hitPct -= 5;
+  if (M.altitude > 500) hitPct += 10;
+  hitPct = Math.max(20, Math.min(98, hitPct));
+  M.weaponHitPct = hitPct;
+
+  crewSpeak('oso','Weapon away.','hot');
+  crewSpeak('nav','Detonation in T-minus 90 seconds. Initiating egress.','alert');
+
+  setTimeout(() => {
+    if (!M) return;
+    SFX.detonation();
+    crewSpeak('oso',`Detonation confirmed. ${M.target.name}. Yield nominal.`,'hot');
+  }, 3000);
+
+  // Start egress
+  setTimeout(() => {
+    if (!M) return;
+    M.phase = 'EGRESS';
+    document.getElementById('tb-phase').textContent='EGRESS';
+    document.getElementById('tb-phase').className='tbi-val';
+    crewSpeak('nav','Egress initiated. Turn west. Full military power.','alert');
+    SFX.navBeep();
+    // Auto-suggest egress heading
+    const egressHdg = Math.round(latLonBearing(M.pos, M.airfield.pos));
+    triggerEvent({
+      title: 'EGRESS HEADING',
+      severity: 'info',
+      body: `NAV recommends heading ${egressHdg}° for recovery.\nSoviet air defense will be active.`,
+      countdown: 0,
+      options: [
+        { label: `SET HEADING ${egressHdg}° — DIRECT RECOVERY`, action: () => {
+          setHdgDirect(egressHdg);
+          M.waypoints = [[...M.airfield.pos]];
+          M.currentWaypointIdx = 0;
+          crewSpeak('nav','Recovery course set. Estimating airspace exit in 25 minutes.','');
+        }},
+        { label: 'MANUAL EGRESS ROUTING', action: () => {
+          crewSpeak('nav','Acknowledged. Use reroute control to plot egress.','warn');
+          M.rerouteMode = true;
+          document.getElementById('map-reroute-btn').className='active';
+          document.getElementById('map-reroute-btn').textContent='✓ DONE';
+        }},
+      ]
+    });
+  }, 4000);
+}
+
+// ── THROTTLE / HEADING ──────────────────────────────────────────
+const THROTTLE = { ECO: { speed:700, fuelRate:0.22, label:'CRUISE' }, MIL: { speed:900, fuelRate:0.40, label:'MILITARY' }, AB: { speed:1200, fuelRate:0.90, label:'AFTERBURNER' } };
+
+function setThrottle(mode) {
+  if (!M) return;
+  M.throttle = mode;
+  M.speed = THROTTLE[mode].speed;
+  M.fuelRate = THROTTLE[mode].fuelRate;
+  SFX.click(); SFX.setEngineThrottle(mode);
+  ['ECO','MIL','AB'].forEach(m => {
+    const el = document.getElementById('thr-'+m.toLowerCase());
+    el.className = 'thr-btn' + (m===mode?' active':'') + (m==='AB'?' red':m==='ECO'?'':'');
+    if (m===mode && m==='AB') el.className='thr-btn active red';
+  });
+  updateTopBar();
+}
+
+function adjustHdg(delta) {
+  if (!M) return;
+  M.targetHeading = ((M.heading + delta) + 360) % 360;
+  SFX.click();
+  document.getElementById('hdg-display').textContent = String(M.targetHeading).padStart(3,'0') + '°';
+  document.getElementById('hdg-input').value = M.targetHeading;
+}
+
+function setHdgDirect(val) {
+  if (!M) return;
+  const h = ((parseInt(val)||0) + 360) % 360;
+  M.targetHeading = h;
+  SFX.navBeep();
+  document.getElementById('hdg-display').textContent = String(h).padStart(3,'0') + '°';
+  document.getElementById('hdg-input').value = h;
+}
+
+function setLight(id, state) {
+  const el = document.getElementById(id);
+  if (el) el.className = 'light ' + state;
+}
+
+// ── HUD UPDATES ─────────────────────────────────────────────────
+function updateTopBar() {
+  if (!M) return;
+  const distKm = Math.round(latLonDist(M.pos, M.target.pos));
+  document.getElementById('tb-time').textContent = formatTime(M.missionSec);
+  document.getElementById('tb-hdg').textContent  = String(Math.round(M.heading)).padStart(3,'0')+'°';
+  document.getElementById('tb-spd').textContent  = M.speed+'KPH';
+  document.getElementById('tb-alt').textContent  = M.altitude+'FT';
+  document.getElementById('tb-dist').textContent = distKm+'KM';
+}
+
+function updateGauges() {
+  if (!M) return;
+  const setG = (id, pct, vid, lbl) => {
+    const f = document.getElementById(id);
+    f.style.width = pct+'%';
+    f.className = 'gauge-fill'+(pct<20?' crit':pct<40?' warn':'');
+    document.getElementById(vid).textContent = lbl||Math.floor(pct)+'%';
+  };
+  setG('g-fuel',  M.fuel,    'gv-fuel');
+  setG('g-hull',  M.airframe,'gv-hull');
+  setG('g-eng1',  M.engine1, 'gv-eng1');
+  setG('g-eng2',  M.engine2, 'gv-eng2');
+
+  // Fuel critical lights
+  if (M.fuel < 15) setLight('sl-fuel-lk','crit');
+  else if (M.fuelLeak) setLight('sl-fuel-lk','warn');
+
+  // ECM light
+  setLight('sl-ecm', M.ecm > 60 ? 'on' : M.ecm > 20 ? 'warn' : 'crit');
+  setLight('sl-nav', M.nav > 60 ? 'on' : M.nav > 20 ? 'warn' : 'crit');
+  setLight('sl-chaff', M.chaff > 0 ? 'on' : 'off');
+  setLight('sl-flare', M.flares > 0 ? 'on' : 'off');
+}
+
+// ── WIN / LOSS ───────────────────────────────────────────────────
+function loseGame(reason) {
+  if (!M || M.phase==='COMPLETE') return;
+  M.phase = 'COMPLETE'; M.lossReason = reason; M.won = false;
+  SFX.missionLoss(); SFX.stopEngine(); SFX.stopMissileLock(); SFX.stopAlarm();
+  clearEvent();
+  crewSpeak('sys', 'AIRCRAFT LOST — ' + reason, 'alert');
+  setTimeout(() => showDebrief(false), 3000);
+}
+
+function winGame() {
+  if (!M || M.phase==='COMPLETE') return;
+  M.phase = 'COMPLETE'; M.won = true;
+  SFX.missionSuccess(); SFX.stopEngine(); SFX.stopMissileLock(); SFX.stopAlarm();
+  clearEvent();
+  crewSpeak('sys','Mission complete. Airspace exited.','hot');
+  setTimeout(() => showDebrief(true), 2000);
+}
+
+function showDebrief(win) {
+  stopGameLoop();
+  document.getElementById('db-title').textContent  = win ? 'MISSION COMPLETE' : 'AIRCRAFT LOST';
+  document.getElementById('db-title').className     = 'debrief-header '+(win?'win':'loss');
+  document.getElementById('db-sub').textContent     = win ? 'CREW SURVIVAL CONFIRMED' : M.lossReason;
+  document.getElementById('db-result').textContent  = win ? 'SUCCESS' : 'FAILURE';
+  document.getElementById('db-result').className    = 'db-val '+(win?'good':'bad');
+  document.getElementById('db-target').textContent  = M.target.name;
+  document.getElementById('db-hitpct').textContent  = win ? M.weaponHitPct+'%' : 'N/A';
+  document.getElementById('db-hitpct').className    = 'db-val '+(M.weaponHitPct>70?'good':M.weaponHitPct>40?'amber':'bad');
+  document.getElementById('db-time').textContent    = formatTime(M.missionSec);
+  document.getElementById('db-hull').textContent    = Math.floor(M.airframe)+'%';
+  document.getElementById('db-hull').className      = 'db-val '+(M.airframe>60?'good':M.airframe>30?'amber':'bad');
+  document.getElementById('db-fuel').textContent    = Math.floor(M.fuel)+'%';
+  document.getElementById('db-fuel').className      = 'db-val '+(M.fuel>30?'good':M.fuel>10?'amber':'bad');
+  document.getElementById('db-eng').textContent     = (M.engine1<=0||M.engine2<=0)?'DAMAGED':'NOMINAL';
+  document.getElementById('db-sys').textContent     = M.systemsLost.length||'NONE';
+  document.getElementById('db-sam').textContent     = M.samLaunches;
+  document.getElementById('db-int').textContent     = M.intercepts;
+  document.getElementById('db-hits').textContent    = M.hitsReceived;
+  document.getElementById('db-cm').textContent      = M.cmUsed;
+  // Assessment
+  let assess = '';
+  if (!win) assess = 'Aircraft and crew lost in hostile territory. Mission failed.';
+  else if (M.hitsReceived === 0) assess = 'Exceptional. Target neutralized with zero damage. Exemplary crew performance.';
+  else if (M.airframe > 70) assess = 'Mission accomplished. Minimal damage sustained. Crew performed within parameters.';
+  else if (M.airframe > 40) assess = 'Mission accomplished with significant battle damage. Aircraft requires extensive repair.';
+  else assess = 'Mission accomplished. Aircraft barely survived. Crew commended for completing mission under severe damage.';
+  document.getElementById('db-assess').textContent = assess;
+  showScreen('debrief');
+}
+
+// ── GAME LOOP ────────────────────────────────────────────────────
+let gameLoopInterval = null;
+const TICK_MS = 1000; // 1 real second = 1 game second
+
+function startGameLoop() {
+  if (gameLoopInterval) clearInterval(gameLoopInterval);
+  gameLoopInterval = setInterval(gameTick, TICK_MS);
+}
+
+function stopGameLoop() {
+  if (gameLoopInterval) { clearInterval(gameLoopInterval); gameLoopInterval=null; }
+}
+
+let mapDrawThrottle = 0;
+
+function gameTick() {
+  if (!M || M.phase==='COMPLETE') return;
+
+  M.missionSec++;
+
+  // Turn aircraft toward target heading
+  const hdgDiff = ((M.targetHeading - M.heading + 540) % 360) - 180;
+  const turnRate = 3; // degrees per second
+  if (Math.abs(hdgDiff) < turnRate) M.heading = M.targetHeading;
+  else M.heading = ((M.heading + Math.sign(hdgDiff) * turnRate) + 360) % 360;
+
+  // Move aircraft
+  const distPerSec = M.speed / 3600; // km/s
+  const hdgRad = M.heading * Math.PI / 180;
+  const dlat = distPerSec * Math.cos(hdgRad) / 111.32;
+  const dlon = distPerSec * Math.sin(hdgRad) / (111.32 * Math.cos(M.pos[0]*Math.PI/180));
+  M.pos[0] += dlat; M.pos[1] += dlon;
+
+  // Track history
+  if (!M.trackHistory) M.trackHistory = [];
+  if (M.missionSec % 10 === 0) M.trackHistory.push([...M.pos]);
+  if (M.trackHistory.length > 200) M.trackHistory.shift();
+
+  // Fuel consumption
+  let fuelBurn = M.fuelRate / 60; // per second
+  if (M.fuelLeak) fuelBurn *= 1.5;
+  M.fuel = Math.max(0, M.fuel - fuelBurn);
+  if (M.fuel <= 0) { loseGame('FUEL EXHAUSTION'); return; }
+
+  // Waypoint navigation
+  if (M.phase !== 'BOMB_RUN' && M.currentWaypointIdx < M.waypoints.length) {
+    const wp = M.waypoints[M.currentWaypointIdx];
+    const distToWp = latLonDist(M.pos, wp);
+    if (distToWp < 30) {
+      M.currentWaypointIdx++;
+      if (M.currentWaypointIdx < M.waypoints.length) {
+        const nextWp = M.waypoints[M.currentWaypointIdx];
+        const newHdg = Math.round(latLonBearing(M.pos, nextWp));
+        M.targetHeading = newHdg;
+        crewSpeak('nav', `Waypoint reached. New heading ${String(newHdg).padStart(3,'0')}°.`, '');
+        SFX.navBeep();
+      }
+    }
+    // Auto-steer toward current waypoint if not in manual reroute
+    if (!M.rerouteMode && M.currentWaypointIdx < M.waypoints.length) {
+      const wp2 = M.waypoints[M.currentWaypointIdx];
+      const autoHdg = Math.round(latLonBearing(M.pos, wp2));
+      if (Math.abs(((autoHdg-M.targetHeading+540)%360)-180) > 5) {
+        M.targetHeading = autoHdg;
+        document.getElementById('hdg-display').textContent = String(autoHdg).padStart(3,'0')+'°';
+      }
+    }
+  }
+
+  // Distance to target
+  const distToTarget = latLonDist(M.pos, M.target.pos);
+
+  // Phase transitions
+  if (M.phase === 'INGRESS' && distToTarget < 80 && !M.ipReached) {
+    M.ipReached = true;
+    M.phase = 'IP_APPROACH';
+    document.getElementById('tb-phase').textContent='IP APPROACH';
+    triggerEvent(buildEventIPApproach());
+  }
+
+  if (M.phase === 'BOMB_RUN' && distToTarget < 5 && !M.weaponReleased) {
+    triggerEvent(buildEventBombRelease());
+  }
+
+  // Egress: check if exited threat area / reached safety
+  if (M.phase === 'EGRESS') {
+    const distFromAirfield = latLonDist(M.pos, M.airfield.pos);
+    if (distFromAirfield < 200 || M.pos[1] < 5) {
+      winGame(); return;
+    }
+    // Increased threat on egress
+    M.eventCooldown = Math.max(0, M.eventCooldown - 1);
+  }
+
+  // Fuel warning
+  if (M.fuel < 20 && M.fuel > 18 && !M.fuelWarnFired) {
+    M.fuelWarnFired = true;
+    crewSpeak('nav', 'Fuel state below 20%. Recommend immediate action.', 'warn');
+    SFX.warning();
+    if (!M.activeEvent) triggerEvent(buildEventFuelWarning());
+  }
+
+  // Tanker proximity
+  if (!M.tankerVisited && M.tankerAvailable) {
+    for (const tk of GEO.tankers) {
+      if (latLonDist(M.pos, tk.pos) < 50) {
+        M.tankerAvailable = false;
+        triggerEvent(buildEventTankerRendezvous());
+        break;
+      }
+    }
+  }
+
+  // Threat zone checks
+  M.eventCooldown = Math.max(0, M.eventCooldown - 1);
+  if (M.eventCooldown <= 0 && !M.activeEvent && M.phase !== 'COMPLETE') {
+    // Check if in threat zone
+    for (const [tlat,tlon,trad,ttype] of GEO.threats) {
+      const d = latLonDist(M.pos, [tlat,tlon]);
+      if (d < trad) {
+        let ev = null;
+        if (ttype==='SAM' && Math.random() < 0.4) ev = buildEventSamLaunch();
+        else if (ttype==='FIGHTER' && Math.random() < 0.35) ev = buildEventFighterIntercept();
+        else if (ttype==='RADAR' && Math.random() < 0.5) ev = buildEventRadarContact();
+        if (ev) { triggerEvent(ev); M.eventCooldown = 45 + Math.random()*90; break; }
+      }
+    }
+    // Background events on egress
+    if (!M.activeEvent && M.phase==='EGRESS' && Math.random() < 0.08) {
+      if (Math.random() < 0.5) triggerEvent(buildEventSamLaunch());
+      else triggerEvent(buildEventFighterIntercept());
+      M.eventCooldown = 60 + Math.random()*60;
+    }
+    // Queue processing
+    if (!M.activeEvent && M.eventQueue.length > 0) {
+      triggerEvent(M.eventQueue.shift());
+    }
+  }
+
+  // Update UI every second, map every 5
+  updateTopBar(); updateGauges();
+  mapDrawThrottle++;
+  if (mapDrawThrottle >= 3) { mapDrawThrottle=0; drawGameMap(); }
+}
+
+// ── SCREEN MANAGEMENT ────────────────────────────────────────────
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+}
+
+// ── BOOT SEQUENCE ────────────────────────────────────────────────
+const BOOT_LINES = [
+  { t:0,   txt:'AN/ASQ-184 OFFENSIVE AVIONICS SYSTEM — INITIALIZING...' },
+  { t:300, txt:'INERTIAL NAVIGATION UNIT: ALIGN COMPLETE' },
+  { t:500, txt:'AN/ALQ-161 DEFENSIVE AVIONICS SYSTEM: ONLINE' },
+  { t:700, txt:'TERRAIN FOLLOWING RADAR: STANDBY' },
+  { t:900, txt:'B61-12 WEAPONS MANAGEMENT COMPUTER: SAFE / LOCKED' },
+  { t:1100,txt:'ENGINE STATUS: 1-NORMAL 2-NORMAL 3-NORMAL 4-NORMAL' },
+  { t:1300,txt:'FUEL STATE: 100.0% — ALL TANKS NOMINAL' },
+  { t:1500,txt:'CREW INTERPHONE: ACTIVE' },
+  { t:1700,txt:'SAC COMMS LINK: AUTHENTICATED' },
+  { t:2000,txt:'——————————————————————————————' },
+  { t:2100,txt:'MISSION ASSIGNMENT RECEIVED — LOADING BRIEFING...' },
+  { t:2600,txt:'' },
+];
+
+function bootSequence() {
+  showScreen('boot');
+  const container = document.getElementById('boot-lines');
+  container.innerHTML = '';
+  commLines = [];
+  newMission();
+
+  BOOT_LINES.forEach(({ t, txt }) => {
+    setTimeout(() => {
+      const div = document.createElement('div');
+      div.className = 'boot-line';
+      div.textContent = txt || '\u00a0';
+      div.style.animationDelay = '0s';
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+      if (txt && !txt.startsWith('—')) SFX.beep(txt.includes('NORMAL')||txt.includes('COMPLETE')||txt.includes('NOMINAL') ? 660 : 440, 0.04);
+    }, t);
+  });
+
+  setTimeout(() => showBrief(), 3200);
+}
+
+function showBrief() {
+  const af = M.airfield, tgt = M.target;
+  document.getElementById('b-depart').textContent = af.name;
+  document.getElementById('b-target').textContent = 'CLASSIFIED';
+  document.getElementById('b-coords').textContent =
+    `${tgt.pos[0].toFixed(2)}°N ${tgt.pos[1].toFixed(2)}°E`;
+  document.getElementById('b-threat').textContent = tgt.threat;
+  document.getElementById('b-ftime').textContent = tgt.time_min + '–' + (tgt.time_min+10) + ' MIN (ROUTE DEPENDENT)';
+  document.getElementById('b-tanker').textContent = '2× KC-135 AVAILABLE — BALTIC / CENTRAL TRACKS';
+  document.getElementById('brief-orders').innerHTML =
+    `Proceed to assigned target coordinates. <span>Destroy target</span> with assigned nuclear device.<br>
+    Egress Soviet airspace by most expedient route.<br>
+    Rules of engagement: <span>weapons free</span> upon IP crossing.<br>
+    Authentication: <span>NOVEMBER KILO SEVEN SEVEN FOUR</span>.`;
+  document.getElementById('plan-dep-label').textContent = af.name;
+  showScreen('brief');
+}
+
+function goPlanning() {
+  SFX.resume(); SFX.click();
+  showScreen('plan');
+  setTimeout(() => {
+    initPlanCanvas();
+    // Populate threat list
+    const list = document.getElementById('plan-threat-list');
+    list.innerHTML = GEO.threats.map(([,,r,tp,nm])=>
+      `<span style="color:${tp==='SAM'?'#ff4040':tp==='FIGHTER'?'#ffaa00':'#ffbb44'}">${tp}</span> — ${nm} (${r}km coverage)<br>`
+    ).join('');
+  }, 100);
+}
+
+function startGame() {
+  showScreen('game');
+  setTimeout(() => {
+    initGameMap();
+    SFX.startEngine();
+    // Initial crew callouts
+    setTimeout(()=>crewSpeak('nav',`Flight plan locked. ${M.waypoints.length} waypoints. Heading ${String(M.heading).padStart(3,'0')}°.`,'hot'),500);
+    setTimeout(()=>crewSpeak('dso','Defensive systems nominal. RWR active.',''),1500);
+    setTimeout(()=>crewSpeak('oso','Weapons safe. ECM suite online.',''),2500);
+    setTimeout(()=>crewSpeak('nav',`Distance to target: ${Math.round(latLonDist(M.pos,M.target.pos))}km. Estimated ${M.target.time_min} minutes flight time.`,''),3500);
+    updateGauges(); updateTopBar();
+    setThrottle('MIL');
+    startGameLoop();
+  }, 200);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  // Kick off on first interaction (audio unlock)
+  document.addEventListener('click', () => SFX.resume(), { once: true });
+  bootSequence();
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', e => {
+    if (!M || M.phase==='COMPLETE') return;
+    if (e.key==='ArrowLeft')  adjustHdg(-5);
+    if (e.key==='ArrowRight') adjustHdg(5);
+    if (e.key==='ArrowUp')    adjustHdg(-1);
+    if (e.key==='ArrowDown')  adjustHdg(1);
+    if (e.key==='1') setThrottle('ECO');
+    if (e.key==='2') setThrottle('MIL');
+    if (e.key==='3') setThrottle('AB');
+    if (e.key==='r'||e.key==='R') toggleReroute();
+    if (e.key===' ') { e.preventDefault(); if(M.weaponArmed&&!M.weaponReleased) releaseWeapon(); }
+  });
+
+  window.addEventListener('resize', () => {
+    if (document.getElementById('screen-plan').classList.contains('active') && planCanvas) {
+      const wrap=document.getElementById('plan-map-wrap');
+      const r=wrap.getBoundingClientRect();
+      planCanvas.width=Math.floor(r.width); planCanvas.height=Math.floor(r.height);
+      drawPlanMap();
+    }
+    if (document.getElementById('screen-game').classList.contains('active') && mapCanvas) {
+      const panel=document.getElementById('map-panel');
+      const r=panel.getBoundingClientRect();
+      mapCanvas.width=Math.floor(r.width); mapCanvas.height=Math.floor(r.height);
+      drawGameMap();
+    }
+  });
+});
+</script>
+
+</body>
+</html>
